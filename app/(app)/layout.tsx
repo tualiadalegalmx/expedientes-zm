@@ -14,7 +14,7 @@ export default async function LayoutApp({ children }: { children: React.ReactNod
         </Link>
         <Nav />
         <form action={salir} className="usuario">
-          <span>{perfil.nombre}</span>
+          <Link href="/contrasena" title="Cambiar mi contraseña" style={{ textDecoration: "none" }}>{perfil.nombre}</Link>
           <button>Salir</button>
         </form>
       </header>

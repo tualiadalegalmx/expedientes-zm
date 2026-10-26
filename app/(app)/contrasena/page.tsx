@@ -26,7 +26,7 @@ export default async function Contrasena({ searchParams }: { searchParams: Promi
   return (
     <form action={guardar} className="hoja" style={{ maxWidth: 460 }}>
       <h1>Tu contraseña</h1>
-      <p className="sub">Hola, {perfil.nombre}. Elige la contraseña con la que vas a entrar.</p>
+      <p className="sub">Hola, {perfil.nombre}. Elige tu propia contraseña; la temporal deja de funcionar al guardar.</p>
       {error && <p className="error">{ERR[error]}</p>}
       <div className="campo" style={{ marginTop: 16 }}>
         <label htmlFor="password">Nueva contraseña <small>(mínimo 10 caracteres)</small></label>
