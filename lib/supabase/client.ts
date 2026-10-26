@@ -1,4 +1,5 @@
+import { urlSupabase, llaveSupabase } from "@/lib/supabase/config";
 import { createBrowserClient } from "@supabase/ssr";
 
 export const supabaseNavegador = () =>
-  createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+  createBrowserClient(urlSupabase(), llaveSupabase());

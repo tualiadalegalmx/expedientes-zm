@@ -1,3 +1,4 @@
+import { urlSupabase, llaveSupabase } from "@/lib/supabase/config";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -6,8 +7,8 @@ import { cache } from "react";
 export async function supabaseServidor() {
   const almacen = await cookies();
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    urlSupabase(),
+    llaveSupabase(),
     {
       cookies: {
         getAll: () => almacen.getAll(),
