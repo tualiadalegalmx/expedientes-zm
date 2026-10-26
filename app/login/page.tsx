@@ -1,4 +1,5 @@
 import { entrar } from "./acciones";
+import { SesionDesdeEnlace } from "@/components/SesionDesdeEnlace";
 
 export const metadata = { title: "Entrar" };
 
@@ -17,6 +18,7 @@ export default async function Login({ searchParams }: { searchParams: Promise<{ 
           <b>Zaida Marmen</b>
           <span>Tu aliada legal</span>
         </div>
+        <SesionDesdeEnlace />
         {error && <p className="error">{ERRORES[error] ?? "No se pudo entrar. Intenta de nuevo."}</p>}
         <div className="campo">
           <label htmlFor="email">Correo</label>

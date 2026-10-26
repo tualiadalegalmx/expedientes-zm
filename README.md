@@ -91,6 +91,13 @@ Estas reglas viven en la base de datos (políticas RLS y triggers), no solo en l
 pantalla: aunque alguien intente saltarse la app, la base lo impide. Las pruebas están
 en `supabase/tests/permisos.sql`.
 
+## Correos de invitación
+
+La app funciona con los correos que Supabase manda por defecto (en inglés): el enlace
+regresa a la página, se abre la sesión y la persona elige su contraseña en `/contrasena`.
+Para personalizarlos en español hay que configurar un servidor de correo propio (SMTP)
+en Supabase; se hará en la Fase 3 junto con las alertas.
+
 ## Desarrollo local
 
 ```

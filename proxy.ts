@@ -23,7 +23,6 @@ export async function proxy(req: NextRequest) {
   if (!data.user && !publica) {
     const url = req.nextUrl.clone();
     url.pathname = "/login";
-    url.search = "";
     return NextResponse.redirect(url);
   }
   return res;
