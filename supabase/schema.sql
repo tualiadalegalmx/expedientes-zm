@@ -74,13 +74,14 @@ insert into materias (nombre, orden) values
 create table etapas (
   id     serial primary key,
   nombre text not null unique,
-  orden  int not null default 100
+  orden  int not null default 100,
+  activa boolean not null default true   -- false = ya no aparece en el menú
 );
 insert into etapas (nombre, orden) values
-  ('Demanda / inicio', 1), ('Admisión', 2), ('Informes previo y justificado', 3),
-  ('Suspensión', 4), ('Pruebas', 5), ('Alegatos', 6), ('Audiencia constitucional', 7),
-  ('Sentencia', 8), ('Recurso', 9), ('Cumplimiento de ejecutoria', 10), ('Ejecución', 11),
-  ('Por definir', 99);
+  ('Inicio', 1), ('Admisión', 2), ('Informe previo', 3), ('Informe justificado', 4),
+  ('Sentencia', 5), ('Recurso', 6), ('Por definir', 99);
+-- "Por definir" solo se usa en la carga inicial; no aparece en el menú.
+update etapas set activa = false where nombre = 'Por definir';
 
 -- ---------------------------------------------------------------------
 -- Expedientes (Módulo 1)

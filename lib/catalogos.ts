@@ -3,11 +3,13 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 export type Opcion = { id: number | string; nombre: string };
 
 export async function catalogos(sb: SupabaseClient) {
-  const [m, e, p] = await Promise.all([
+  const [m, e0, p] = await Promise.all([
     sb.from("materias").select("id, nombre").order("orden").order("nombre"),
-    sb.from("etapas").select("id, nombre").order("orden").order("nombre"),
+    sb.from("etapas").select("id, nombre").eq("activa", true).order("orden").order("nombre"),
     sb.from("perfiles").select("id, nombre, rol").eq("activo", true).order("nombre"),
   ]);
+  // Si la base todavía no tiene la columna "activa" (migración 002 sin correr), muestra todas.
+  const e = e0.error ? await sb.from("etapas").select("id, nombre").order("orden").order("nombre") : e0;
   return {
     materias: (m.data ?? []) as Opcion[],
     etapas: (e.data ?? []) as Opcion[],

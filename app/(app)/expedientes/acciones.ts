@@ -45,7 +45,9 @@ export async function guardarExpediente(_: Resultado, form: FormData): Promise<R
   const datos = {
     numero: txt(form, "numero"),
     juzgado: txt(form, "juzgado"),
-    autoridad: txt(form, "autoridad"),
+    // Un solo campo "Autoridad" en pantalla (se guarda en juzgado); la columna autoridad
+    // se llena igual para no romper la base ni los datos anteriores.
+    autoridad: txt(form, "juzgado"),
     lugar: txt(form, "lugar"),
     cliente: txt(form, "cliente"),
     contraparte: txt(form, "contraparte"),
@@ -56,7 +58,7 @@ export async function guardarExpediente(_: Resultado, form: FormData): Promise<R
     materia_id,
     etapa_id,
   };
-  const faltan = (["numero", "juzgado", "autoridad", "lugar", "cliente", "responsable_id"] as const).filter((k) => !datos[k]);
+  const faltan = (["numero", "juzgado", "lugar", "cliente", "responsable_id"] as const).filter((k) => !datos[k]);
   if (faltan.length) return { error: "Faltan datos obligatorios." };
 
   if (id) {

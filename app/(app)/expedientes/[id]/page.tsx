@@ -56,7 +56,7 @@ export default async function Ficha({ params }: { params: Promise<{ id: string }
       <section className="ficha-cabeza">
         <div>
           <div className="numero">{e.numero}</div>
-          <div className="juzgado">{e.juzgado} · {e.autoridad}</div>
+          <div className="juzgado">{e.juzgado}</div>
           <dl className="datos" style={{ marginTop: 16 }}>
             <div><dt>Cliente</dt><dd>{e.cliente}</dd></div>
             {e.contraparte && <div><dt>Contraparte</dt><dd>{e.contraparte}</dd></div>}

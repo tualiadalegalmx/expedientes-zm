@@ -46,12 +46,8 @@ export function ExpedienteForm({
           <input id="numero" name="numero" defaultValue={exp.numero} required placeholder="Ej. 1029/2026" />
         </div>
         <div className="campo">
-          <label htmlFor="juzgado">Juzgado o sala</label>
+          <label htmlFor="juzgado">Autoridad</label>
           <input id="juzgado" name="juzgado" defaultValue={exp.juzgado} required placeholder="Ej. Quinto Juzgado de Distrito" />
-        </div>
-        <div className="campo ancho">
-          <label htmlFor="autoridad">Autoridad ante quien se promueve</label>
-          <input id="autoridad" name="autoridad" defaultValue={exp.autoridad} required />
         </div>
         <div className="campo">
           <label htmlFor="lugar">Lugar donde se promueve</label>
@@ -84,12 +80,15 @@ export function ExpedienteForm({
             </>
           )}
         </div>
-        <div className="campo">
-          <label htmlFor="estado">Estado</label>
-          <select id="estado" name="estado" defaultValue={exp.estado ?? "activo"}>
-            {estados.map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-          </select>
-        </div>
+        {/* Un expediente nuevo siempre nace activo; el estado se cambia al editarlo. */}
+        {!nuevo && (
+          <div className="campo">
+            <label htmlFor="estado">Estado</label>
+            <select id="estado" name="estado" defaultValue={exp.estado ?? "activo"}>
+              {estados.map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+            </select>
+          </div>
+        )}
         <div className="campo ancho">
           <label htmlFor="notas">Notas generales <small>(opcional)</small></label>
           <textarea id="notas" name="notas" defaultValue={exp.notas ?? ""} />
