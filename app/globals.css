@@ -17,6 +17,7 @@
   --ambar: #b8862a;
   --rojo: #a5432f;
   --vencido: #7a2418;
+  --azul: #2f5d86;
 
   --titulo: "Cormorant Garamond", Georgia, serif;
   --texto: "Source Sans 3", system-ui, sans-serif;
@@ -184,6 +185,15 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--b
 .evento.t-promocion::after { background: var(--bosque); }
 .evento.t-acuerdo::after { border-color: var(--bronce); background: var(--bronce); }
 .evento.t-pendiente::after { border-color: var(--ambar); border-radius: 2px; }
+/* Retroalimentación: resaltada en azul en la historia del expediente. */
+.evento.t-retroalimentacion > div:last-child {
+  background: #e3ecf5; border-left: 3px solid var(--azul); border-radius: var(--r); padding: 6px 10px;
+}
+.evento.t-retroalimentacion .tipo { color: var(--azul); }
+.evento.t-retroalimentacion::after { border-color: var(--azul); background: var(--azul); }
+/* Atendido: en rojo. */
+.evento.t-atendido .tipo { color: var(--rojo); }
+.evento.t-atendido::after { border-color: var(--rojo); background: var(--rojo); }
 .evento .cuando { font-size: 0.85rem; color: var(--tenue); text-align: right; padding-top: 2px; }
 .evento .tipo { font-weight: 600; color: var(--bosque); }
 .evento .texto { white-space: pre-line; margin: 2px 0 0; }
@@ -198,6 +208,9 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--b
   padding: 5px 10px; border-radius: 999px;
 }
 .pestanas button[aria-pressed="true"] { background: var(--bosque); border-color: var(--bosque); color: var(--crema); }
+/* "Atendido" siempre en rojo, para distinguirlo de las demás pestañas. */
+.pestanas button.p-atendido { color: var(--rojo); border-color: var(--rojo); font-weight: 600; }
+.pestanas button.p-atendido[aria-pressed="true"] { background: var(--rojo); border-color: var(--rojo); color: #fff; }
 
 .calculo { background: #fff; border: 1px dashed var(--bronce); border-radius: var(--r); padding: 12px; }
 .calculo strong { font: 600 1.3rem var(--titulo); color: var(--bosque); }

@@ -24,6 +24,8 @@ async function idCatalogo(sb: SupabaseClient, tabla: "materias" | "etapas", eleg
 
 const mensaje = (e: { message: string } | null | undefined) => {
   if (!e) return "No se pudo guardar.";
+  if (e.message.includes("invalid input value for enum"))
+    return "Este tipo de registro todavía no está habilitado en la base de datos. Pide a Ricardo que corra la migración 003.";
   if (e.message.includes("row-level security")) return "No tienes permiso para cambiar este registro; solo su autor o Zaida pueden hacerlo.";
   return e.message;
 };

@@ -25,6 +25,9 @@ export const TIPOS = {
   cliente: "Llamada o reunión con cliente",
   estudio: "Atención o estudio",
   pendiente: "Pendiente / acción inmediata",
+  gestion: "Gestiones",
+  retroalimentacion: "Retroalimentación",
+  atendido: "Atendido",
 } as const;
 export type Tipo = keyof typeof TIPOS;
 

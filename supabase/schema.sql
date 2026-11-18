@@ -21,7 +21,10 @@ create type tipo_registro as enum (
   'visita',         -- Visita al juzgado
   'cliente',        -- Llamada o reunión con cliente
   'estudio',        -- Atención o estudio del asunto
-  'pendiente'       -- Pendiente / acción inmediata
+  'pendiente',      -- Pendiente / acción inmediata
+  'gestion',        -- Gestiones
+  'retroalimentacion',
+  'atendido'
 );
 create type unidad_plazo as enum ('dias', 'horas');
 create type tipo_dias as enum ('habiles', 'naturales');

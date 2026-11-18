@@ -14,6 +14,9 @@ const ARCHIVO: Record<Tipo, string | null> = {
   cliente: "Archivo (opcional)",
   estudio: "Archivo (opcional)",
   pendiente: null,
+  gestion: null,
+  retroalimentacion: null,
+  atendido: null,
 };
 
 function Plazo() {
@@ -101,6 +104,9 @@ export function RegistroForm({
     cliente: "Temas tratados",
     estudio: "Qué se trabajó",
     pendiente: "Qué falta",
+    gestion: "Descripción",
+    retroalimentacion: "Descripción",
+    atendido: "Descripción",
   };
 
   return (
@@ -110,7 +116,7 @@ export function RegistroForm({
       <input type="hidden" name="tipo" value={tipo} />
       <div className="pestanas" role="group" aria-label="Tipo de registro">
         {(Object.keys(TIPOS) as Tipo[]).map((t) => (
-          <button type="button" key={t} aria-pressed={tipo === t} onClick={() => setTipo(t)}>{TIPOS[t]}</button>
+          <button type="button" key={t} className={`p-${t}`} aria-pressed={tipo === t} onClick={() => setTipo(t)}>{TIPOS[t]}</button>
         ))}
       </div>
       {estado.error && <p className="error" role="alert">{estado.error}</p>}
