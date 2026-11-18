@@ -233,3 +233,41 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--b
 .entrada .firma span { font: italic 500 1.15rem var(--titulo); color: var(--bronce); }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* ---------- Tareas ---------- */
+.tableros { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; align-items: start; }
+.tablero { padding: 0 0 16px; overflow: hidden; }
+.tablero-cabeza {
+  background: var(--bosque); color: var(--crema);
+  padding: 14px 20px; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap;
+}
+.tablero-cabeza h2 { font-size: 1.6rem; }
+.tablero-cabeza .aviso { color: var(--bronce-claro); }
+.tarea-nueva { margin: 16px 20px 0; }
+.tarea-form { margin: 16px 20px 0; padding: 14px; background: #fff; border: 1px solid var(--bronce); border-radius: var(--r); display: grid; gap: 10px; }
+
+.grupo { margin: 18px 20px 0; padding-left: 12px; border-left: 4px solid var(--g); }
+.grupo h3 { font-size: 1.15rem; color: var(--g); display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.grupo h3 span {
+  font: 600 0.8rem var(--texto); background: var(--g); color: #fff;
+  border-radius: 999px; padding: 1px 8px; min-width: 1.6rem; text-align: center;
+}
+.g-pendiente  { --g: var(--bronce); --g-fondo: #faf3e6; }
+.g-en_proceso { --g: var(--azul);   --g-fondo: #e9f0f7; }
+.g-terminada  { --g: var(--verde);  --g-fondo: #ecf3ea; }
+
+.tareas { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.tarea {
+  background: var(--g-fondo); border: 1px solid color-mix(in srgb, var(--g) 25%, transparent);
+  border-radius: var(--r); padding: 10px 12px;
+  display: flex; gap: 10px; justify-content: space-between; align-items: flex-start; flex-wrap: wrap;
+}
+.tarea-texto { flex: 1 1 200px; min-width: 0; }
+.tarea-texto p { margin: 2px 0 0; font-size: 0.92rem; white-space: pre-line; }
+.tarea.e-terminada strong { text-decoration: line-through; color: var(--tenue); font-weight: 600; }
+.tarea-pie { display: flex; gap: 10px; flex-wrap: wrap; font-size: 0.8rem; color: var(--tenue); margin-top: 4px; }
+.t-fecha.pronto { color: var(--ambar); font-weight: 600; }
+.t-fecha.vencida { color: var(--rojo); font-weight: 600; }
+.tarea-botones { display: flex; gap: 6px; flex-wrap: wrap; }
+@media (max-width: 420px) { .tableros { grid-template-columns: 1fr; } }
+.tableros > .hoja { margin-top: 0; }

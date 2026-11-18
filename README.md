@@ -21,6 +21,9 @@ y archivos).
 2. Pega todo el contenido de `supabase/schema.sql` y presiona **Run**.
    Crea las tablas, los permisos, el historial imborrable y el espacio para archivos.
 
+3. Después corre, en orden, cada archivo de `supabase/migraciones/` (002, 003, 004…).
+   Todos se pueden correr más de una vez sin problema.
+
 ### 2. Inicio de sesión
 
 1. Supabase → **Authentication → Sign In / Providers**: deja solo *Email* activo y
