@@ -19,14 +19,15 @@ const ARCHIVO: Record<Tipo, string | null> = {
   atendido: null,
 };
 
-function Plazo() {
+function Plazo({ inhabiles }: { inhabiles: string[] }) {
+  const setInh = useMemo(() => new Set(inhabiles), [inhabiles]);
   const [surte, setSurte] = useState(hoy());
   const [cantidad, setCantidad] = useState(3);
   const [unidad, setUnidad] = useState<"dias" | "horas">("dias");
   const [tipo, setTipo] = useState<"habiles" | "naturales">("habiles");
   const calculado = useMemo(
-    () => (surte && cantidad > 0 ? calcularVencimiento(surte, cantidad, unidad, tipo) : ""),
-    [surte, cantidad, unidad, tipo],
+    () => (surte && cantidad > 0 ? calcularVencimiento(surte, cantidad, unidad, tipo, setInh) : ""),
+    [surte, cantidad, unidad, tipo, setInh],
   );
   const [venc, setVenc] = useState(calculado);
   useEffect(() => setVenc(calculado), [calculado]);
@@ -66,7 +67,7 @@ function Plazo() {
         <span>Vence el <strong>{venc ? fechaLarga(venc) : "—"}</strong></span>
         <span className="aviso">
           {tipo === "habiles"
-            ? "Cálculo sin sábados ni domingos. Los días inhábiles de cada tribunal se agregan en la siguiente fase: revisa si hay alguno en medio."
+            ? "Cálculo sin sábados, domingos ni los días inhábiles del Calendario. Revisa si el tribunal suspendió labores algún otro día."
             : "Cálculo en días naturales."}
         </span>
         <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", marginTop: 8 }}>
@@ -82,9 +83,9 @@ function Plazo() {
 }
 
 export function RegistroForm({
-  expedienteId, usuarios, usuarioId, plazosAbiertos,
+  expedienteId, usuarios, usuarioId, plazosAbiertos, inhabiles = [],
 }: {
-  expedienteId: string; usuarios: Opcion[]; usuarioId: string; plazosAbiertos: PlazoAbierto[];
+  expedienteId: string; usuarios: Opcion[]; usuarioId: string; plazosAbiertos: PlazoAbierto[]; inhabiles?: string[];
 }) {
   const [tipo, setTipo] = useState<Tipo>("estudio");
   const [genera, setGenera] = useState<"si" | "no" | "">("");
@@ -197,7 +198,7 @@ export function RegistroForm({
         )}
       </div>
 
-      {tipo === "acuerdo" && genera === "si" && <Plazo />}
+      {tipo === "acuerdo" && genera === "si" && <Plazo inhabiles={inhabiles} />}
 
       {ARCHIVO[tipo] && (
         <div className="campo" style={{ marginTop: 14 }}>

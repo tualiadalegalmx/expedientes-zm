@@ -7,6 +7,7 @@ const ENLACES = [
   { href: "/expedientes", texto: "Expedientes" },
   { href: "/expedientes/nuevo", texto: "Nuevo expediente" },
   { href: "/tareas", texto: "Tareas" },
+  { href: "/calendario", texto: "Calendario" },
 ];
 
 export function Nav() {

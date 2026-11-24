@@ -36,6 +36,9 @@ export default async function Ficha({ params }: { params: Promise<{ id: string }
     sb.from("adjuntos").select("id, bitacora_id, ruta, nombre").eq("expediente_id", id),
     catalogos(sb),
   ]);
+  // Días inhábiles generales (sin tribunal) y los del juzgado de este expediente.
+  const { data: inh } = await sb.from("dias_inhabiles").select("fecha, autoridad");
+  const inhabiles = (inh ?? []).filter((d) => !d.autoridad || (e && e.juzgado.toLowerCase().includes(String(d.autoridad).toLowerCase()))).map((d) => d.fecha as string);
   if (!e) notFound();
 
   const nombre = new Map(c.usuarios.map((u) => [u.id, u.nombre]));
@@ -177,6 +180,7 @@ export default async function Ficha({ params }: { params: Promise<{ id: string }
           expedienteId={id}
           usuarios={c.usuarios}
           usuarioId={perfil.id}
+          inhabiles={inhabiles}
           plazosAbiertos={abiertos.map((p) => ({ id: p.id, actuacion: p.actuacion, vencimiento: p.vencimiento }))}
         />
       </div>
