@@ -191,8 +191,14 @@ export async function eliminarRegistro(form: FormData) {
 
 export async function plazoSinEfecto(form: FormData) {
   const { sb, perfil } = await usuarioActual();
-  if (!puedeAnularPlazo(perfil.rol)) return;
-  await sb.rpc("anular_plazo", { p_id: String(form.get("id")) });
-  revalidatePath(`/expedientes/${form.get("expediente_id")}`);
+  const exp = String(form.get("expediente_id"));
+  if (!puedeAnularPlazo(perfil.rol)) redirect(`/expedientes/${exp}?aviso=sin-permiso`);
+  const { error } = await sb.rpc("anular_plazo", { p_id: String(form.get("id")) });
+  if (error) {
+    const falta = error.code === "PGRST202" || error.message.includes("anular_plazo");
+    redirect(`/expedientes/${exp}?aviso=${falta ? "falta-008" : "error"}&detalle=${encodeURIComponent(error.message)}`);
+  }
+  revalidatePath(`/expedientes/${exp}`);
   revalidatePath("/");
+  redirect(`/expedientes/${exp}?aviso=sin-efecto`);
 }

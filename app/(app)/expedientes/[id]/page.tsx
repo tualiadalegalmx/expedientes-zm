@@ -27,8 +27,16 @@ type Plazo = {
 
 const momento = new Intl.DateTimeFormat("es-MX", { dateStyle: "medium", timeStyle: "short", timeZone: "America/Mexico_City" });
 
-export default async function Ficha({ params }: { params: Promise<{ id: string }> }) {
+const AVISOS: Record<string, { tipo: "ok" | "error"; texto: string }> = {
+  "sin-efecto": { tipo: "ok", texto: "El plazo quedó sin efecto." },
+  "falta-008": { tipo: "error", texto: "No se pudo dejar el plazo sin efecto: falta correr la migración 008 en Supabase." },
+  "sin-permiso": { tipo: "error", texto: "Tu usuario no tiene permiso para dejar plazos sin efecto." },
+  error: { tipo: "error", texto: "No se pudo dejar el plazo sin efecto." },
+};
+
+export default async function Ficha({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ aviso?: string; detalle?: string }> }) {
   const { id } = await params;
+  const { aviso, detalle } = await searchParams;
   const { sb, perfil, esAdmin } = await usuarioActual();
   const [{ data: e }, { data: regs }, { data: plazos }, { data: adj }, c] = await Promise.all([
     sb.from("v_expedientes").select("*").eq("id", id).maybeSingle(),
@@ -55,8 +63,15 @@ export default async function Ficha({ params }: { params: Promise<{ id: string }
   const n = proximo ? diasRestantes(proximo.vencimiento) : null;
   const quieto = diasDesde(e.ultimo_movimiento);
 
+  const msg = aviso ? AVISOS[aviso] : undefined;
+
   return (
     <>
+      {msg && (
+        <p className={msg.tipo === "ok" ? "aviso-ok" : "error"} role={msg.tipo === "ok" ? "status" : "alert"} style={{ marginBottom: 16 }}>
+          {msg.texto}{msg.tipo === "error" && detalle && <><br /><small>Detalle técnico: {detalle}</small></>}
+        </p>
+      )}
       <section className="ficha-cabeza">
         <div>
           <div className="numero">{e.numero}</div>
