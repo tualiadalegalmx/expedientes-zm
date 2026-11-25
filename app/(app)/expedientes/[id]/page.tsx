@@ -166,7 +166,6 @@ export default async function Ficha({ params }: { params: Promise<{ id: string }
                             type="button"
                             className="boton secundario chico bloqueado"
                             disabled
-                            title="Solo Zaida, Rafael y Ricardo pueden dejar un plazo sin efecto"
                           >
                             Plazo sin efecto
                           </button>
