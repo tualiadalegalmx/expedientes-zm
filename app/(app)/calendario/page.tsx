@@ -101,7 +101,11 @@ export default async function Calendario({ searchParams }: { searchParams: Promi
       <div className="encabezado">
         <div>
           <h1>Calendario</h1>
-          <p className="sub">Vencimientos, audiencias, pendientes y agenda del despacho.</p>
+          <p className="sub">
+            {esAdmin
+              ? "Vencimientos y audiencias del despacho, más las tareas y la agenda de todo el equipo."
+              : "Vencimientos y audiencias del despacho, más tus tareas y tu agenda personal."}
+          </p>
         </div>
         <nav className="mes-nav" aria-label="Cambiar de mes">
           <Link className="boton secundario chico" href={`/calendario?mes=${mesAnt}`}>‹ Anterior</Link>
@@ -211,6 +215,7 @@ export default async function Calendario({ searchParams }: { searchParams: Promi
           {!sinTablas && (
             <div className="grupo g-pendiente">
               <h3>Agendar en este día</h3>
+              <p className="aviso" style={{ margin: "0 0 8px" }}>{esAdmin ? "Puedes agendar para cualquier persona." : "Solo tú y Zaida verán lo que agendes."}</p>
               <AgendaForm fecha={diaSel} usuarios={(rUsr.data ?? []) as { id: string; nombre: string }[]} usuarioId={perfil.id} esAdmin={esAdmin} />
             </div>
           )}

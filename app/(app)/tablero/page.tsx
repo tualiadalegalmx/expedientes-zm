@@ -31,7 +31,8 @@ export default async function Tablero() {
   regsSemana.forEach((r) => porTipo.set(r.tipo, (porTipo.get(r.tipo) ?? 0) + 1));
   const maxTipo = Math.max(1, ...porTipo.values());
 
-  const apoyo = porPersona.filter((p) => p.rol === "administrativo" || p.rol === "desarrollo");
+  // Las tareas son personales: Zaida ve las de todos; Ricardo, solo las suyas.
+  const apoyo = porPersona.filter((p) => (p.rol === "administrativo" || p.rol === "desarrollo") && (perfil.rol === "admin" || p.id === perfil.id));
   const nombre = new Map(d.personas.map((p) => [p.id, p.nombre]));
   const numExp = new Map(d.expedientes.map((x) => [x.id, x.numero]));
 

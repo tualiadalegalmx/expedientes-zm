@@ -46,6 +46,9 @@ export default async function Tareas() {
     personas = data ?? [];
   }
 
+  // Tareas personales: cada quien ve solo su tarjeta; Zaida ve las de todos.
+  if (!esAdmin) personas = [{ id: perfil.id, nombre: perfil.nombre }];
+
   const sinTabla = error && (error.message.includes("tareas") || error.code === "PGRST205" || error.code === "42P01");
   const lista = (tareas ?? []) as Tarea[];
 
@@ -54,7 +57,11 @@ export default async function Tareas() {
       <div className="encabezado">
         <div>
           <h1>Tareas</h1>
-          <p className="sub">Cada quien agrega sus tareas y las mueve conforme avanza.</p>
+          <p className="sub">
+            {esAdmin
+              ? "Ves las tareas de todo el equipo y puedes asignarles nuevas."
+              : "Tus tareas personales: solo tú y Zaida las pueden ver."}
+          </p>
         </div>
       </div>
 
