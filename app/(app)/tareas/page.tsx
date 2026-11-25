@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { usuarioActual } from "@/lib/supabase/server";
+import { puedeCotizar } from "@/lib/cotizacion";
 import { diasRestantes, fecha } from "@/lib/fechas";
 import { TareaForm } from "@/components/TareaForm";
 import { borrarTarea, moverTarea } from "./acciones";
@@ -63,6 +65,9 @@ export default async function Tareas() {
               : "Tus tareas personales: solo tú y Zaida las pueden ver."}
           </p>
         </div>
+        {puedeCotizar(perfil.rol) && (
+          <Link className="boton bronce" href="/cotizaciones">Generador de cotizaciones</Link>
+        )}
       </div>
 
       {sinTabla && <p className="error">La sección de tareas todavía no está habilitada en la base de datos. Corre la migración 004 en Supabase.</p>}

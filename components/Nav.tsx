@@ -14,7 +14,7 @@ export function Nav({ avisos = 0, tablero = false }: { avisos?: number; tablero?
   const ruta = usePathname();
   const enlaces = tablero ? [...ENLACES, { href: "/tablero", texto: "Tablero" }] : ENLACES;
   const activo = (href: string) =>
-    href === "/" ? ruta === "/" : href === "/expedientes" ? ruta.startsWith("/expedientes") && ruta !== "/expedientes/nuevo" : href === "/tablero" ? ruta === "/tablero" || ruta === "/reporte" : ruta === href;
+    href === "/" ? ruta === "/" : href === "/expedientes" ? ruta.startsWith("/expedientes") && ruta !== "/expedientes/nuevo" : href === "/tareas" ? ruta === "/tareas" || ruta.startsWith("/cotizaciones") : href === "/tablero" ? ruta === "/tablero" || ruta === "/reporte" : ruta === href;
   return (
     <nav className="nav" aria-label="Principal">
       {enlaces.map((e) => (

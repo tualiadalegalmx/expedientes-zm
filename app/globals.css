@@ -447,3 +447,67 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--b
 .evento.t-termino::after { border-color: var(--bronce); background: var(--crema); border-width: 3px; }
 /* Botón visible pero sin permiso */
 .boton.bloqueado, .boton.bloqueado:hover { opacity: 0.5; cursor: not-allowed; background: transparent; border-style: dashed; }
+
+/* ---------- Cotizaciones ---------- */
+.empresas-chips { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+.empresa-chip {
+  display: inline-flex; align-items: center; gap: 8px; text-decoration: none; background: var(--crema);
+  border: 1px solid; border-left-width: 5px; border-radius: var(--r); padding: 8px 12px; font-weight: 600;
+}
+.empresa-chip i { width: 10px; height: 10px; border-radius: 50%; }
+.empresa-chip span { font-weight: 400; font-size: 0.82rem; color: var(--tenue); }
+.empresa-chip:hover { background: #fff; }
+.cot-fila { grid-template-columns: 8rem 1fr 9rem 14rem; }
+.cot-fila-der { display: flex; gap: 10px; align-items: center; justify-content: flex-end; }
+.est-borrador { background: #ece6db; color: var(--tenue); }
+.est-enviada { background: #e3ecf5; color: var(--azul); }
+.est-aceptada { background: #dfe8dc; color: var(--verde); }
+.est-rechazada { background: #f6ddd6; color: var(--rojo); }
+.cot-form { display: grid; gap: 20px; }
+.cot-bloque { padding: 0 0 18px; overflow: hidden; }
+.cot-bloque + .cot-bloque { margin-top: 0; }
+.cot-campos { padding: 16px 20px 0; }
+.cot-tabla-wrap { overflow-x: auto; padding: 0 8px; }
+.cot-tabla td { vertical-align: top; padding: 8px 6px; }
+.cot-tabla textarea { min-height: 42px; }
+.cot-importe { text-align: right; font-weight: 600; padding-top: 16px !important; white-space: nowrap; }
+.cot-acc { white-space: nowrap; }
+.cot-acc .boton { padding: 4px 8px; }
+.cot-totales { display: grid; grid-template-columns: 1fr minmax(260px, 340px); gap: 20px; padding: 16px 20px 0; align-items: start; }
+@media (max-width: 760px) { .cot-totales { grid-template-columns: 1fr; } }
+.cot-suma { margin: 0; display: grid; gap: 4px; }
+.cot-suma > div { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; }
+.cot-suma dt { color: var(--tenue); }
+.cot-suma dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+.cot-total { border-top: 2px solid var(--emp, var(--bosque)); padding-top: 8px !important; }
+.cot-total dt { color: var(--tinta); font-weight: 700; }
+.cot-total dd { font: 600 1.5rem var(--titulo); color: var(--emp, var(--bosque)); }
+.cot-letra { font-size: 0.8rem; color: var(--tenue); margin: 4px 0 0; text-align: right; }
+.cot-estado { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin: -6px 0 16px; }
+.empresa-det summary { cursor: pointer; list-style: none; }
+.empresa-det summary::-webkit-details-marker { display: none; }
+.empresa-det[open] { padding-bottom: 16px; }
+
+/* Hoja de cotización (pantalla y PDF) */
+.cotizacion { --emp: var(--bosque); }
+.cz-cabeza { display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; border-bottom: 4px solid var(--emp); padding-bottom: 16px; }
+.cz-emp { font: 600 1.7rem var(--titulo); color: var(--emp); display: block; }
+.cz-datos { display: flex; flex-direction: column; font-size: 0.85rem; color: var(--tenue); margin-top: 4px; }
+.cz-folio { text-align: right; }
+.cz-folio h1 { font-size: 1.6rem; text-transform: none; color: var(--emp); }
+.cz-folio dl { margin: 6px 0 0; font-size: 0.88rem; }
+.cz-folio dl div { display: flex; gap: 10px; justify-content: flex-end; }
+.cz-folio dt { color: var(--tenue); }
+.cz-folio dd { margin: 0; font-weight: 600; }
+.cz-cliente { background: #faf7f1; border-left: 4px solid var(--emp); padding: 12px 16px; margin: 20px 0; }
+.cz-cliente span { font-size: 0.78rem; color: var(--tenue); display: block; }
+.cz-cliente b { font-size: 1.1rem; }
+.cz-cliente p { margin: 2px 0 0; font-size: 0.88rem; color: var(--tenue); }
+.cz-tabla { font-size: 0.9rem; }
+.cz-tabla thead th { background: var(--emp); color: #fff; }
+.cz-tabla .der { text-align: right; white-space: nowrap; }
+.cz-pie { display: grid; grid-template-columns: 1fr minmax(240px, 320px); gap: 24px; margin-top: 16px; align-items: start; }
+.cz-letra { margin: 0; font-size: 0.85rem; }
+.cz-letra span { display: block; font-size: 0.75rem; color: var(--tenue); }
+@media (max-width: 640px) { .cz-pie { grid-template-columns: 1fr; } .cz-folio { text-align: left; } .cz-folio dl div { justify-content: flex-start; } .cz-tabla { display: block; overflow-x: auto; } }
+@media print { .cot-estado { display: none !important; } .cotizacion .rep-sec h2 { border-left-color: var(--emp); } }
