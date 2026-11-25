@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { usuarioActual } from "@/lib/supabase/server";
+import { puedeAnularPlazo } from "@/lib/despacho";
 
 export type Resultado = { error?: string; ok?: boolean };
 
@@ -189,8 +190,9 @@ export async function eliminarRegistro(form: FormData) {
 }
 
 export async function plazoSinEfecto(form: FormData) {
-  const { sb } = await usuarioActual();
-  await sb.from("plazos").update({ estado: "sin_efecto" }).eq("id", String(form.get("id")));
+  const { sb, perfil } = await usuarioActual();
+  if (!puedeAnularPlazo(perfil.rol)) return;
+  await sb.rpc("anular_plazo", { p_id: String(form.get("id")) });
   revalidatePath(`/expedientes/${form.get("expediente_id")}`);
   revalidatePath("/");
 }

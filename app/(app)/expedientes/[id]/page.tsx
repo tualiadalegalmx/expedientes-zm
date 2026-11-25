@@ -5,6 +5,7 @@ import { catalogos, ESTADOS, TIPOS, type Tipo } from "@/lib/catalogos";
 import { diasDesde, diasRestantes, fecha, semaforo, textoRestantes } from "@/lib/fechas";
 import { PlazoChip } from "@/components/Semaforo";
 import { RegistroForm } from "@/components/RegistroForm";
+import { puedeAnularPlazo } from "@/lib/despacho";
 import { eliminarRegistro, marcarPendiente, plazoSinEfecto } from "../acciones";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
@@ -154,7 +155,7 @@ export default async function Ficha({ params }: { params: Promise<{ id: string }
                       )}
                       <div className="pie">
                         <span>{nombre.get(r.created_by) ?? "—"} · {momento.format(new Date(r.created_at))}{editado && " · editado"}</span>
-                        {plazo?.estado === "abierto" && (esAdmin || r.created_by === perfil.id || e.responsable_id === perfil.id) && (
+                        {plazo?.estado === "abierto" && puedeAnularPlazo(perfil.rol) && (
                           <form action={plazoSinEfecto}>
                             <input type="hidden" name="id" value={plazo.id} />
                             <input type="hidden" name="expediente_id" value={id} />

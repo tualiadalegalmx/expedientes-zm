@@ -2,6 +2,9 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { diasDesde, diasRestantes, hoy } from "@/lib/fechas";
 
 /** Quién puede ver el tablero y el reporte: Zaida (admin) y Ricardo (desarrollo). */
+/** Quién puede dejar un plazo "sin efecto": Zaida, Rafael y Ricardo. */
+export const puedeAnularPlazo = (rol: string) => rol === "admin" || rol === "administrativo" || rol === "desarrollo";
+
 export const puedeVerTablero = (rol: string) => rol === "admin" || rol === "desarrollo";
 
 export type Persona = { id: string; nombre: string; rol: string };
