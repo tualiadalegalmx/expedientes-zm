@@ -28,6 +28,7 @@ export const TIPOS = {
   gestion: "Gestiones",
   retroalimentacion: "Retroalimentación",
   atendido: "Atendido",
+  termino: "Término",
 } as const;
 export type Tipo = keyof typeof TIPOS;
 

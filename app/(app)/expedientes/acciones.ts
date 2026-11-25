@@ -25,7 +25,7 @@ async function idCatalogo(sb: SupabaseClient, tabla: "materias" | "etapas", eleg
 const mensaje = (e: { message: string } | null | undefined) => {
   if (!e) return "No se pudo guardar.";
   if (e.message.includes("invalid input value for enum"))
-    return "Este tipo de registro todavía no está habilitado en la base de datos. Pide a Ricardo que corra la migración 003.";
+    return "Este tipo de registro todavía no está habilitado en la base de datos. Pide a Ricardo que corra la migración más reciente (carpeta supabase/migraciones).";
   if (e.message.includes("recordar_dias"))
     return "Los recordatorios todavía no están habilitados. Pide a Ricardo que corra la migración 006, o elige \"Sin aviso adicional\".";
   if (e.message.includes("row-level security")) return "No tienes permiso para cambiar este registro; solo su autor o Zaida pueden hacerlo.";
@@ -109,7 +109,7 @@ export async function agregarRegistro(_: Resultado, form: FormData): Promise<Res
   const descripcion = txt(form, "descripcion");
   if (!descripcion) return { error: "Escribe una descripción breve." };
 
-  const generaPlazo = tipo === "acuerdo" ? form.get("genera_plazo") === "si" : null;
+  const generaPlazo = tipo === "acuerdo" || tipo === "termino" ? form.get("genera_plazo") === "si" : null;
   const plazo = generaPlazo
     ? {
         fecha_surte_efectos: txt(form, "surte_efectos"),

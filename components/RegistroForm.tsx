@@ -17,6 +17,7 @@ const ARCHIVO: Record<Tipo, string | null> = {
   gestion: null,
   retroalimentacion: null,
   atendido: null,
+  termino: "Agregar archivos (opcional)",
 };
 
 function Plazo({ inhabiles }: { inhabiles: string[] }) {
@@ -117,6 +118,7 @@ export function RegistroForm({
     gestion: "Descripción",
     retroalimentacion: "Descripción",
     atendido: "Descripción",
+    termino: "Descripción",
   };
 
   return (
@@ -135,7 +137,7 @@ export function RegistroForm({
       <div className="campos">
         {tipo !== "pendiente" && (
           <div className="campo">
-            <label htmlFor="fecha">{tipo === "acuerdo" ? "Fecha de notificación" : "Fecha"}</label>
+            <label htmlFor="fecha">{tipo === "acuerdo" ? "Fecha de notificación" : tipo === "termino" ? "Fecha de término" : "Fecha"}</label>
             <input id="fecha" name="fecha" type="date" defaultValue={hoy()} required />
           </div>
         )}
@@ -192,7 +194,7 @@ export function RegistroForm({
             </select>
           </div>
         )}
-        {tipo === "acuerdo" && (
+        {(tipo === "acuerdo" || tipo === "termino") && (
           <fieldset className="campo ancho" style={{ border: 0, padding: 0, margin: 0 }}>
             <legend style={{ fontSize: "0.88rem", fontWeight: 600, color: "var(--bosque)", marginBottom: 4 }}>¿Genera plazo?</legend>
             <div style={{ display: "flex", gap: 18 }}>
@@ -207,7 +209,7 @@ export function RegistroForm({
         )}
       </div>
 
-      {tipo === "acuerdo" && genera === "si" && <Plazo inhabiles={inhabiles} />}
+      {(tipo === "acuerdo" || tipo === "termino") && genera === "si" && <Plazo inhabiles={inhabiles} />}
 
       {ARCHIVO[tipo] && (
         <div className="campo" style={{ marginTop: 14 }}>

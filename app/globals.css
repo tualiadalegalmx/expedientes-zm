@@ -442,3 +442,6 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--b
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .rep-tabla tr { break-inside: avoid; }
 }
+/* Término: en bronce en la historia del expediente. */
+.evento.t-termino .tipo { color: #7c5d2f; }
+.evento.t-termino::after { border-color: var(--bronce); background: var(--crema); border-width: 3px; }

@@ -24,7 +24,8 @@ create type tipo_registro as enum (
   'pendiente',      -- Pendiente / acción inmediata
   'gestion',        -- Gestiones
   'retroalimentacion',
-  'atendido'
+  'atendido',
+  'termino'
 );
 create type unidad_plazo as enum ('dias', 'horas');
 create type tipo_dias as enum ('habiles', 'naturales');
