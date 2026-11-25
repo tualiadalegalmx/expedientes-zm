@@ -445,3 +445,5 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--b
 /* Término: en bronce en la historia del expediente. */
 .evento.t-termino .tipo { color: #7c5d2f; }
 .evento.t-termino::after { border-color: var(--bronce); background: var(--crema); border-width: 3px; }
+/* Botón visible pero sin permiso */
+.boton.bloqueado, .boton.bloqueado:hover { opacity: 0.5; cursor: not-allowed; background: transparent; border-style: dashed; }

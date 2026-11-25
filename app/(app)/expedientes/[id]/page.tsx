@@ -155,13 +155,22 @@ export default async function Ficha({ params }: { params: Promise<{ id: string }
                       )}
                       <div className="pie">
                         <span>{nombre.get(r.created_by) ?? "—"} · {momento.format(new Date(r.created_at))}{editado && " · editado"}</span>
-                        {plazo?.estado === "abierto" && puedeAnularPlazo(perfil.rol) && (
+                        {plazo?.estado === "abierto" && (puedeAnularPlazo(perfil.rol) ? (
                           <form action={plazoSinEfecto}>
                             <input type="hidden" name="id" value={plazo.id} />
                             <input type="hidden" name="expediente_id" value={id} />
                             <button className="boton secundario chico">Plazo sin efecto</button>
                           </form>
-                        )}
+                        ) : (
+                          <button
+                            type="button"
+                            className="boton secundario chico bloqueado"
+                            disabled
+                            title="Solo Zaida, Rafael y Ricardo pueden dejar un plazo sin efecto"
+                          >
+                            Plazo sin efecto
+                          </button>
+                        ))}
                         {esAdmin && (
                           <form action={eliminarRegistro}>
                             <input type="hidden" name="id" value={r.id} />
