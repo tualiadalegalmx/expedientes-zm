@@ -10,13 +10,14 @@ const ENLACES = [
   { href: "/calendario", texto: "Calendario" },
 ];
 
-export function Nav({ avisos = 0 }: { avisos?: number }) {
+export function Nav({ avisos = 0, tablero = false }: { avisos?: number; tablero?: boolean }) {
   const ruta = usePathname();
+  const enlaces = tablero ? [...ENLACES, { href: "/tablero", texto: "Tablero" }] : ENLACES;
   const activo = (href: string) =>
-    href === "/" ? ruta === "/" : href === "/expedientes" ? ruta.startsWith("/expedientes") && ruta !== "/expedientes/nuevo" : ruta === href;
+    href === "/" ? ruta === "/" : href === "/expedientes" ? ruta.startsWith("/expedientes") && ruta !== "/expedientes/nuevo" : href === "/tablero" ? ruta === "/tablero" || ruta === "/reporte" : ruta === href;
   return (
     <nav className="nav" aria-label="Principal">
-      {ENLACES.map((e) => (
+      {enlaces.map((e) => (
         <Link key={e.href} href={e.href} aria-current={activo(e.href) ? "page" : undefined}>
           {e.texto}
           {e.href === "/" && avisos > 0 && (
