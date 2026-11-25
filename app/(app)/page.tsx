@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { usuarioActual } from "@/lib/supabase/server";
-import { diasDesde, diasRestantes, fecha, fechaLarga, hoy } from "@/lib/fechas";
+import { diasDesde, diasRestantes, fecha, fechaLarga, hoy, saludo } from "@/lib/fechas";
 import { PlazoChip } from "@/components/Semaforo";
 import { TIPOS, type Tipo } from "@/lib/catalogos";
 import { recordatorios } from "@/lib/recordatorios";
@@ -34,7 +34,7 @@ export default async function Hoy() {
     <>
       <div className="encabezado">
         <div>
-          <h1>Buen día, {perfil.nombre}</h1>
+          <h1>{saludo()}, {perfil.nombre.split(" ")[0]}</h1>
           <p className="sub" style={{ textTransform: "none" }}>{fechaLarga(hoyIso).replace(/^./, (c) => c.toUpperCase())}</p>
         </div>
         <form action="/expedientes" role="search" style={{ display: "flex", gap: 8, minWidth: "min(100%, 360px)" }}>

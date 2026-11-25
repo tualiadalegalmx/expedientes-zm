@@ -78,3 +78,11 @@ export function textoRestantes(n: number): string {
   if (n === 1) return "Vence mañana";
   return `Faltan ${n} días hábiles`;
 }
+
+/** Saludo según la hora en la Ciudad de México. */
+export function saludo(): string {
+  const h = Number(new Intl.DateTimeFormat("en-US", { timeZone: ZONA, hour: "numeric", hourCycle: "h23" }).format(new Date()));
+  if (h >= 5 && h < 12) return "Buenos días";
+  if (h >= 12 && h < 19) return "Buenas tardes";
+  return "Buenas noches";
+}
