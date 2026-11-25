@@ -3,11 +3,14 @@ import { usuarioActual } from "@/lib/supabase/server";
 import { diasDesde, diasRestantes, fecha, fechaLarga, hoy } from "@/lib/fechas";
 import { PlazoChip } from "@/components/Semaforo";
 import { TIPOS, type Tipo } from "@/lib/catalogos";
+import { recordatorios } from "@/lib/recordatorios";
+import { AvisoRecordatorios } from "@/components/AvisoRecordatorios";
 
 export const metadata = { title: "Hoy" };
 
 export default async function Hoy() {
   const { sb, perfil } = await usuarioActual();
+  const avisos = await recordatorios();
   const ayer = new Date(Date.now() - 2 * 86_400_000).toISOString();
 
   const [{ data: plazos }, { data: pendientes }, { data: exps }, { data: actividad }, { data: usuarios }] = await Promise.all([
@@ -39,6 +42,8 @@ export default async function Hoy() {
           <button className="boton">Buscar</button>
         </form>
       </div>
+
+      <AvisoRecordatorios lista={avisos} />
 
       <section className="hoja seccion">
         <h2>Vence hoy y en los próximos 3 días</h2>

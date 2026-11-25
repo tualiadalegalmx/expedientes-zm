@@ -32,6 +32,16 @@ export function AgendaForm({ fecha, usuarios, usuarioId, esAdmin }: {
             <option value="cita">Cita o reunión</option>
           </select>
         </div>
+        <div className="campo">
+          <label htmlFor="a-rec">Recordarme</label>
+          <select id="a-rec" name="recordar_dias" defaultValue="">
+            <option value="">Solo ese día</option>
+            <option value="1">1 día antes</option>
+            <option value="2">2 días antes</option>
+            <option value="3">3 días antes</option>
+            <option value="7">1 semana antes</option>
+          </select>
+        </div>
         {esAdmin && (
           <div className="campo">
             <label htmlFor="a-resp">Para</label>

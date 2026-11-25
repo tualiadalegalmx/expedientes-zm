@@ -26,6 +26,8 @@ const mensaje = (e: { message: string } | null | undefined) => {
   if (!e) return "No se pudo guardar.";
   if (e.message.includes("invalid input value for enum"))
     return "Este tipo de registro todavía no está habilitado en la base de datos. Pide a Ricardo que corra la migración 003.";
+  if (e.message.includes("recordar_dias"))
+    return "Los recordatorios todavía no están habilitados. Pide a Ricardo que corra la migración 006, o elige \"Sin aviso adicional\".";
   if (e.message.includes("row-level security")) return "No tienes permiso para cambiar este registro; solo su autor o Zaida pueden hacerlo.";
   return e.message;
 };
@@ -117,6 +119,7 @@ export async function agregarRegistro(_: Resultado, form: FormData): Promise<Res
         actuacion: txt(form, "actuacion"),
         fundamento: txt(form, "fundamento"),
         vencimiento: txt(form, "vencimiento"),
+        ...(txt(form, "recordar_dias") ? { recordar_dias: Number(txt(form, "recordar_dias")) } : {}),
       }
     : null;
   if (plazo) {

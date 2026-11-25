@@ -59,9 +59,18 @@ function Plazo({ inhabiles }: { inhabiles: string[] }) {
         <label htmlFor="actuacion">Qué actuación vence</label>
         <input id="actuacion" name="actuacion" required placeholder="Ej. Rendir informe justificado" />
       </div>
-      <div className="campo ancho">
+      <div className="campo">
         <label htmlFor="fundamento">Fundamento <small>(opcional)</small></label>
         <input id="fundamento" name="fundamento" placeholder="Ej. Art. 117 Ley de Amparo" />
+      </div>
+      <div className="campo">
+        <label htmlFor="recordar_dias">Recordarme <small>(además del aviso a 2 días)</small></label>
+        <select id="recordar_dias" name="recordar_dias" defaultValue="">
+          <option value="">Sin aviso adicional</option>
+          <option value="3">3 días hábiles antes</option>
+          <option value="5">5 días hábiles antes</option>
+          <option value="10">10 días hábiles antes</option>
+        </select>
       </div>
       <div className="campo ancho calculo">
         <span>Vence el <strong>{venc ? fechaLarga(venc) : "—"}</strong></span>

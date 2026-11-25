@@ -12,6 +12,8 @@ const txt = (f: FormData, k: string) => {
 function mensaje(m: string) {
   if ((m.includes("agenda") || m.includes("dias_inhabiles")) && (m.includes("does not exist") || m.includes("schema cache")))
     return "El calendario todavía no está habilitado en la base de datos. Pide a Ricardo que corra la migración 005.";
+  if (m.includes("recordar_dias"))
+    return "Los recordatorios todavía no están habilitados. Pide a Ricardo que corra la migración 006, o guarda sin recordatorio.";
   if (m.includes("row-level security")) return "Solo puedes agregar o cambiar tus propias actividades.";
   if (m.includes("duplicate key")) return "Ese día ya está marcado como inhábil.";
   return m;
@@ -21,7 +23,9 @@ export async function agregarAgenda(_: Resultado, form: FormData): Promise<Resul
   const { sb, perfil } = await usuarioActual();
   const titulo = txt(form, "titulo");
   if (!titulo) return { error: "Escribe la actividad." };
+  const rec = txt(form, "recordar_dias");
   const { error } = await sb.from("agenda").insert({
+    ...(rec ? { recordar_dias: Number(rec) } : {}),
     fecha: txt(form, "fecha"),
     hora: txt(form, "hora"),
     titulo,
