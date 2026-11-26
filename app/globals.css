@@ -649,3 +649,13 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--b
 .ent-borrar-mes p { margin: 0 0 8px; }
 .ent-editar { margin: 16px 20px 0; }
 .ent-editar summary { cursor: pointer; font-size: 0.9rem; color: var(--bosque); font-weight: 600; margin-bottom: 8px; }
+.ent-col { display: grid; gap: 20px; min-width: 0; }
+.ent-col > .hoja { margin: 0; padding: 0 0 16px; overflow: hidden; }
+.ent-perm .doc { background: #fffdf7; }
+.tipo-doc { border: 0; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tipo-doc label { display: flex; flex-direction: column; gap: 1px; cursor: pointer; border: 1px solid var(--greige); border-radius: var(--r); padding: 8px 10px; background: #fff; }
+.tipo-doc label.sel { border-color: var(--bosque); box-shadow: inset 0 0 0 1px var(--bosque); background: #f3f6f1; }
+.tipo-doc input { position: absolute; opacity: 0; pointer-events: none; }
+.tipo-doc label:focus-within { outline: 2px solid var(--bronce); outline-offset: 2px; }
+.tipo-doc b { font-size: 0.95rem; color: var(--bosque); }
+.tipo-doc span { font-size: 0.8rem; color: var(--tenue); }

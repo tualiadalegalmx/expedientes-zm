@@ -19,12 +19,12 @@ export default async function Empresas({ searchParams }: { searchParams: Promise
   const mesActual = hoy().slice(0, 7) + "-01";
   const [{ data, error }, { data: docs }] = await Promise.all([
     sb.from("entidades").select("*").eq("activa", true).order("orden").order("nombre"),
-    sb.from("documentos_entidad").select("entidad_id, periodo"),
+    sb.from("documentos_entidad").select("*"),
   ]);
   const entidades = (data ?? []) as Entidad[];
   const delMes = new Map<number, number>();
   (docs ?? []).forEach((d) => {
-    if (d.periodo === mesActual) delMes.set(d.entidad_id, (delMes.get(d.entidad_id) ?? 0) + 1);
+    if (!d.permanente && d.periodo === mesActual) delMes.set(d.entidad_id, (delMes.get(d.entidad_id) ?? 0) + 1);
   });
   const puede = puedeSubirDocs(perfil.rol);
 

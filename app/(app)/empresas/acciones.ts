@@ -19,13 +19,16 @@ export async function eliminarDocumento(form: FormData) {
     await sb.from("documentos_entidad").delete().eq("id", id);
   }
   revalidatePath(`/empresas/${entidad}`);
-  redirect(`/empresas/${entidad}?mes=${form.get("mes") ?? ""}&aviso=borrado`);
+  const mes = String(form.get("mes") ?? "");
+  redirect(`/empresas/${entidad}?${mes ? `mes=${mes}&` : ""}aviso=borrado`);
 }
 
 export async function eliminarMes(form: FormData) {
   const { sb } = await equipo();
   const entidad = String(form.get("entidad_id")), periodo = String(form.get("periodo"));
-  const { data: docs } = await sb.from("documentos_entidad").select("id, ruta").eq("entidad_id", Number(entidad)).eq("periodo", periodo);
+  // Solo los mensuales de ese mes; los permanentes nunca se borran en bloque.
+  const { data: todos } = await sb.from("documentos_entidad").select("*").eq("entidad_id", Number(entidad)).eq("periodo", periodo);
+  const docs = (todos ?? []).filter((d) => !d.permanente);
   if (docs?.length) {
     await sb.storage.from(BUCKET_DOCS).remove(docs.map((d) => d.ruta));
     await sb.from("documentos_entidad").delete().in("id", docs.map((d) => d.id));

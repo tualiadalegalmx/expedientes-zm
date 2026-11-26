@@ -2,16 +2,18 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabaseNavegador } from "@/lib/supabase/client";
-import { BUCKET_DOCS, CATEGORIAS, tamano } from "@/lib/entidades";
+import { BUCKET_DOCS, CATEGORIAS_MENSUALES, CATEGORIAS_PERMANENTES, tamano } from "@/lib/entidades";
 
 const LIMITE = 25 * 1024 * 1024;
 
 /** Sube los archivos directo al almacenamiento (sin pasar por el servidor) y los registra. */
-export function SubirDocumentos({ entidadId, mesInicial }: { entidadId: number; mesInicial: string }) {
+export function SubirDocumentos({ entidadId, mesInicial, permanenteInicial = false }: { entidadId: number; mesInicial: string; permanenteInicial?: boolean }) {
   const router = useRouter();
   const input = useRef<HTMLInputElement>(null);
   const [archivos, setArchivos] = useState<File[]>([]);
-  const [categoria, setCategoria] = useState(CATEGORIAS[0]);
+  const [permanente, setPermanente] = useState(permanenteInicial);
+  const lista = permanente ? CATEGORIAS_PERMANENTES : CATEGORIAS_MENSUALES;
+  const [categoria, setCategoria] = useState(lista[0]);
   const [otra, setOtra] = useState("");
   const [mes, setMes] = useState(mesInicial);
   const [notas, setNotas] = useState("");
@@ -29,7 +31,7 @@ export function SubirDocumentos({ entidadId, mesInicial }: { entidadId: number; 
     for (const a of archivos) {
       setEstado({ subiendo: `Subiendo ${hechos + 1} de ${archivos.length}: ${a.name}` });
       const limpio = a.name.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^\w.\-]+/g, "_");
-      const ruta = `${entidadId}/${mes}/${Date.now()}_${limpio}`;
+      const ruta = `${entidadId}/${permanente ? "permanentes" : mes}/${Date.now()}_${limpio}`;
       const { error: e1 } = await sb.storage.from(BUCKET_DOCS).upload(ruta, a, { contentType: a.type || undefined });
       if (e1) {
         const sinPermiso = e1.message.includes("row-level security") || e1.message.includes("Unauthorized");
@@ -39,13 +41,17 @@ export function SubirDocumentos({ entidadId, mesInicial }: { entidadId: number; 
       const { error: e2 } = await sb.from("documentos_entidad").insert({
         entidad_id: entidadId, categoria: cat, periodo: `${mes}-01`, nombre: a.name, ruta,
         tipo_mime: a.type || null, bytes: a.size, notas: notas.trim() || null, created_by: u.user?.id,
+        ...(permanente ? { permanente: true } : {}),
       });
-      if (e2) { await sb.storage.from(BUCKET_DOCS).remove([ruta]); return setEstado({ error: `No se pudo registrar ${a.name}: ${e2.message}` }); }
+      if (e2) {
+        await sb.storage.from(BUCKET_DOCS).remove([ruta]);
+        return setEstado({ error: e2.message.includes("permanente") ? "Falta correr la migración 015 en Supabase para subir documentos permanentes." : `No se pudo registrar ${a.name}: ${e2.message}` });
+      }
       hechos++;
     }
     setArchivos([]); setNotas(""); if (input.current) input.current.value = "";
     setEstado({ ok: `${hechos} ${hechos === 1 ? "archivo subido" : "archivos subidos"}.` });
-    router.push(`?mes=${mes}`);
+    router.push(permanente ? "?" : `?mes=${mes}`);
     router.refresh();
   };
 
@@ -53,18 +59,28 @@ export function SubirDocumentos({ entidadId, mesInicial }: { entidadId: number; 
     <form onSubmit={subir} className="tarea-form subir-docs" style={{ margin: 0 }}>
       {estado.error && <p className="error" role="alert">{estado.error}</p>}
       {estado.ok && <p className="aviso-ok" role="status" style={{ margin: 0 }}>{estado.ok}</p>}
+      <fieldset className="tipo-doc" role="radiogroup" aria-label="¿Cada cuánto se actualiza?">
+        {([[false, "Mensual", "Se renueva cada mes"], [true, "Permanente", "Se sube una sola vez"]] as const).map(([v, t, d]) => (
+          <label key={t} className={permanente === v ? "sel" : ""}>
+            <input type="radio" name="permanente" checked={permanente === v} onChange={() => { setPermanente(v); setCategoria((v ? CATEGORIAS_PERMANENTES : CATEGORIAS_MENSUALES)[0]); }} />
+            <b>{t}</b><span>{d}</span>
+          </label>
+        ))}
+      </fieldset>
       <div className="campos" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))" }}>
         <div className="campo">
           <label htmlFor="d-cat">Tipo de documento</label>
           <select id="d-cat" value={categoria} onChange={(e) => setCategoria(e.target.value)}>
-            {CATEGORIAS.map((c) => <option key={c}>{c}</option>)}
+            {lista.map((c) => <option key={c}>{c}</option>)}
           </select>
           {categoria === "Otro" && <input value={otra} onChange={(e) => setOtra(e.target.value)} placeholder="¿Qué documento es?" aria-label="Nombre del documento" />}
         </div>
-        <div className="campo">
-          <label htmlFor="d-mes">Mes al que corresponde</label>
-          <input id="d-mes" type="month" value={mes} onChange={(e) => setMes(e.target.value)} required />
-        </div>
+        {!permanente && (
+          <div className="campo">
+            <label htmlFor="d-mes">Mes al que corresponde</label>
+            <input id="d-mes" type="month" value={mes} onChange={(e) => setMes(e.target.value)} required />
+          </div>
+        )}
       </div>
       <div className="campo">
         <label htmlFor="d-arch">Archivos <small>(PDF, imagen, Word o Excel; máx. 25 MB cada uno)</small></label>

@@ -2,6 +2,7 @@ export type Entidad = { id: number; nombre: string; tipo: "fisica" | "moral"; co
 export type Documento = {
   id: string; entidad_id: number; categoria: string; periodo: string; nombre: string; ruta: string;
   tipo_mime: string | null; bytes: number | null; notas: string | null; created_by: string; created_at: string;
+  permanente?: boolean;
 };
 
 export const BUCKET_DOCS = "documentos-empresas";
@@ -9,7 +10,8 @@ export const BUCKET_DOCS = "documentos-empresas";
 /** Zaida, Rafael y Ricardo suben y eliminan; todos consultan y descargan. */
 export const puedeSubirDocs = (rol: string) => rol === "admin" || rol === "administrativo" || rol === "desarrollo";
 
-export const CATEGORIAS = [
+/** Se actualizan cada mes. */
+export const CATEGORIAS_MENSUALES = [
   "Constancia de situación fiscal",
   "Opinión de cumplimiento SAT (32-D)",
   "Opinión de cumplimiento IMSS",
@@ -17,9 +19,18 @@ export const CATEGORIAS = [
   "Constancia de no adeudo estatal",
   "Comprobante de domicilio",
   "Estado de cuenta bancario",
+  "Otro",
+];
+
+/** Se suben una sola vez y no se borran al limpiar un mes. */
+export const CATEGORIAS_PERMANENTES = [
   "Acta constitutiva",
   "Poder notarial",
   "Identificación oficial",
+  "Currículum",
+  "Cédula fiscal / RFC",
+  "Registro patronal IMSS",
+  "Contrato",
   "Otro",
 ];
 

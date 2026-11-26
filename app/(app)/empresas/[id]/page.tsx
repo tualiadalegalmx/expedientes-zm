@@ -38,7 +38,9 @@ export default async function ExpedienteEmpresa({ params, searchParams }: { para
   ]);
   if (!ent) notFound();
   const e = ent as Entidad;
-  const lista = (docs ?? []) as Documento[];
+  const todos = (docs ?? []) as Documento[];
+  const permanentes = todos.filter((d) => d.permanente);
+  const lista = todos.filter((d) => !d.permanente);
   const nombre = new Map((us ?? []).map((u) => [u.id, u.nombre as string]));
   const puede = puedeSubirDocs(perfil.rol);
   const aviso = AVISOS[sp.aviso ?? ""];
@@ -49,10 +51,41 @@ export default async function ExpedienteEmpresa({ params, searchParams }: { para
   const mesSel = sp.mes && /^\d{4}-\d{2}$/.test(sp.mes) ? sp.mes : meses[0];
   if (!meses.includes(mesSel)) meses.push(mesSel);
   const delMes = lista.filter((d) => d.periodo.slice(0, 7) === mesSel);
-  const porCategoria = new Map<string, Documento[]>();
-  delMes.forEach((d) => porCategoria.set(d.categoria, [...(porCategoria.get(d.categoria) ?? []), d]));
+  const agrupar = (ds: Documento[]) => {
+    const m = new Map<string, Documento[]>();
+    ds.forEach((d) => m.set(d.categoria, [...(m.get(d.categoria) ?? []), d]));
+    return [...m];
+  };
   const anteriores = meses.filter((m) => m < mesHoy && lista.some((d) => d.periodo.slice(0, 7) === m));
   const color = textoSobre(e.color);
+  const grupos = (gs: [string, Documento[]][]) => gs.map(([cat, ds]) => (
+                <div key={cat} className="ent-cat">
+                  <h3 style={{ borderColor: e.color }}>{cat}</h3>
+                  <ul>
+                    {ds.map((d) => (
+                      <li key={d.id} className="doc">
+                        <span className="doc-ico" style={{ background: e.color, color }}>{icono(d.tipo_mime, d.nombre)}</span>
+                        <div className="doc-txt">
+                          <a href={`/documento?id=${d.id}`} target="_blank" rel="noopener"><strong>{d.nombre}</strong></a>
+                          <span className="aviso">{[tamano(d.bytes), `${nombre.get(d.created_by) ?? "—"}, ${momento.format(new Date(d.created_at))}`].filter(Boolean).join(" · ")}</span>
+                          {d.notas && <span className="doc-notas">{d.notas}</span>}
+                        </div>
+                        <div className="doc-acc">
+                          <a className="boton secundario chico" href={`/documento?id=${d.id}`} target="_blank" rel="noopener">Ver</a>
+                          <a className="boton chico" href={`/documento?id=${d.id}&descargar`}>Descargar</a>
+                          {puede && (
+                            <form action={eliminarDocumento}>
+                              <input type="hidden" name="id" value={d.id} /><input type="hidden" name="entidad_id" value={e.id} /><input type="hidden" name="mes" value={d.permanente ? "" : mesSel} />
+                              <button className="boton secundario chico peligro">Eliminar</button>
+                            </form>
+                          )}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ));
+
 
   return (
     <>
@@ -60,7 +93,7 @@ export default async function ExpedienteEmpresa({ params, searchParams }: { para
         <div>
           <Link href="/empresas" className="ent-volver" style={{ color }}>‹ Empresas</Link>
           <h1>{e.nombre}</h1>
-          <p>{e.tipo === "fisica" ? "Persona física" : "Persona moral"}{e.rfc && ` · RFC ${e.rfc}`} · {lista.length} {lista.length === 1 ? "documento" : "documentos"} en total</p>
+          <p>{e.tipo === "fisica" ? "Persona física" : "Persona moral"}{e.rfc && ` · RFC ${e.rfc}`} · {permanentes.length} {permanentes.length === 1 ? "permanente" : "permanentes"} · {lista.length} {lista.length === 1 ? "mensual" : "mensuales"}</p>
         </div>
       </header>
 
@@ -72,6 +105,19 @@ export default async function ExpedienteEmpresa({ params, searchParams }: { para
       )}
 
       <div className="ent-layout">
+        <div className="ent-col">
+        <section className="hoja tablero ent-perm">
+          <header className="tablero-cabeza" style={{ background: e.color, color }}>
+            <h2>Documentos permanentes</h2>
+            <span className="aviso" style={{ color }}>{permanentes.length} · no se borran al cambiar de mes</span>
+          </header>
+          <div className="ent-docs">
+            {permanentes.length === 0
+              ? <p className="vacio">Aquí van el acta constitutiva, poderes, currículum y lo que no cambia cada mes.</p>
+              : grupos(agrupar(permanentes))}
+          </div>
+        </section>
+
         <section className="hoja tablero">
           <header className="tablero-cabeza" style={{ background: e.color, color }}>
             <h2>{nombreMes(mesSel + "-01")}</h2>
@@ -90,33 +136,7 @@ export default async function ExpedienteEmpresa({ params, searchParams }: { para
             {delMes.length === 0 ? (
               <p className="vacio">{mesSel === mesHoy ? "Todavía no se cargan los documentos de este mes." : "No hay documentos de este mes."}</p>
             ) : (
-              [...porCategoria].map(([cat, ds]) => (
-                <div key={cat} className="ent-cat">
-                  <h3 style={{ borderColor: e.color }}>{cat}</h3>
-                  <ul>
-                    {ds.map((d) => (
-                      <li key={d.id} className="doc">
-                        <span className="doc-ico" style={{ background: e.color, color }}>{icono(d.tipo_mime, d.nombre)}</span>
-                        <div className="doc-txt">
-                          <a href={`/documento?id=${d.id}`} target="_blank" rel="noopener"><strong>{d.nombre}</strong></a>
-                          <span className="aviso">{[tamano(d.bytes), `${nombre.get(d.created_by) ?? "—"}, ${momento.format(new Date(d.created_at))}`].filter(Boolean).join(" · ")}</span>
-                          {d.notas && <span className="doc-notas">{d.notas}</span>}
-                        </div>
-                        <div className="doc-acc">
-                          <a className="boton secundario chico" href={`/documento?id=${d.id}`} target="_blank" rel="noopener">Ver</a>
-                          <a className="boton chico" href={`/documento?id=${d.id}&descargar`}>Descargar</a>
-                          {puede && (
-                            <form action={eliminarDocumento}>
-                              <input type="hidden" name="id" value={d.id} /><input type="hidden" name="entidad_id" value={e.id} /><input type="hidden" name="mes" value={mesSel} />
-                              <button className="boton secundario chico peligro">Eliminar</button>
-                            </form>
-                          )}
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))
+              grupos(agrupar(delMes))
             )}
           </div>
 
@@ -131,6 +151,7 @@ export default async function ExpedienteEmpresa({ params, searchParams }: { para
             </details>
           )}
         </section>
+        </div>
 
         {puede && (
           <aside className="hoja tablero">
