@@ -54,11 +54,13 @@ update empresas set prefijo = 'TXX', folio_con_anio = false, folio_digitos = 3,
  where nombre = 'TXX';
 -- Poiesis: general GCP-001; SEFIPLAN SEF-01-26 (su propio consecutivo)
 update empresas set prefijo = 'GCP', folio_con_anio = false, folio_digitos = 3,
-       especial_prefijo = 'SEF', especial_nombre = 'SEFIPLAN', especial_con_anio = true, especial_digitos = 2
+       especial_prefijo = 'SEF', especial_nombre = 'SEFIPLAN', especial_con_anio = true, especial_digitos = 2,
+       numero_proveedor = '58629'
  where nombre = 'Poiesis';
 
 select nombre,
        prefijo || '-' || lpad('1', folio_digitos, '0') as folio_general,
        coalesce(especial_prefijo || '-' || lpad('1', especial_digitos, '0') || case when especial_con_anio then '-' || to_char(now(), 'YY') else '' end, '—') as folio_especial,
-       coalesce(especial_nombre, '—') as serie_especial
+       coalesce(especial_nombre, '—') as serie_especial,
+       coalesce(numero_proveedor, '—') as no_proveedor
 from empresas order by nombre;
