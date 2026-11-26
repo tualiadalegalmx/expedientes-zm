@@ -5,6 +5,9 @@ import { diasDesde, diasRestantes, hoy } from "@/lib/fechas";
 /** Quién puede dejar un plazo "sin efecto": Zaida, Rafael y Ricardo. */
 export const puedeAnularPlazo = (rol: string) => rol === "admin" || rol === "administrativo" || rol === "desarrollo";
 
+/** Quién puede eliminar expedientes: Zaida, Rafael y Ricardo. */
+export const puedeEliminarExpediente = (rol: string) => rol === "admin" || rol === "administrativo" || rol === "desarrollo";
+
 export const puedeVerTablero = (rol: string) => rol === "admin" || rol === "desarrollo";
 
 export type Persona = { id: string; nombre: string; rol: string };

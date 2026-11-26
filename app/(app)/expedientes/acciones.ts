@@ -3,7 +3,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { usuarioActual } from "@/lib/supabase/server";
-import { puedeAnularPlazo } from "@/lib/despacho";
+import { puedeAnularPlazo, puedeEliminarExpediente } from "@/lib/despacho";
 
 export type Resultado = { error?: string; ok?: boolean };
 
@@ -81,11 +81,17 @@ export async function guardarExpediente(_: Resultado, form: FormData): Promise<R
 }
 
 export async function eliminarExpediente(form: FormData) {
-  const { sb, esAdmin } = await usuarioActual();
-  if (!esAdmin) return;
-  await sb.from("expedientes").delete().eq("id", String(form.get("id")));
+  const { sb, perfil } = await usuarioActual();
+  const id = String(form.get("id"));
+  if (!puedeEliminarExpediente(perfil.rol)) redirect(`/expedientes?aviso=sin-permiso`);
+  const { data: exp } = await sb.from("expedientes").select("numero").eq("id", id).maybeSingle();
+  const { data: archivos } = await sb.from("adjuntos").select("ruta").eq("expediente_id", id);
+  const { error, count } = await sb.from("expedientes").delete({ count: "exact" }).eq("id", id);
+  if (error || !count) redirect(`/expedientes?aviso=${error ? "error-borrar" : "falta-016"}`);
+  if (archivos?.length) await sb.storage.from("adjuntos").remove(archivos.map((a) => a.ruta));
   revalidatePath("/expedientes");
-  redirect("/expedientes");
+  revalidatePath("/");
+  redirect(`/expedientes?aviso=eliminado&num=${encodeURIComponent(exp?.numero ?? "")}`);
 }
 
 // ---------------------------------------------------------------- Bitácora

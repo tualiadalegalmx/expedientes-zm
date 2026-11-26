@@ -3,16 +3,19 @@ import { usuarioActual } from "@/lib/supabase/server";
 import { catalogos, ESTADOS } from "@/lib/catalogos";
 import { diasDesde } from "@/lib/fechas";
 import { PlazoChip } from "@/components/Semaforo";
+import { puedeEliminarExpediente } from "@/lib/despacho";
+import { eliminarExpediente } from "./acciones";
 
 export const metadata = { title: "Expedientes" };
 
-type Filtros = { q?: string; materia?: string; responsable?: string; etapa?: string; estado?: string; quietos?: string };
+type Filtros = { aviso?: string; num?: string; q?: string; materia?: string; responsable?: string; etapa?: string; estado?: string; quietos?: string };
 
 const SIN_MOVIMIENTO = 3;
 
 export default async function Expedientes({ searchParams }: { searchParams: Promise<Filtros> }) {
   const f = await searchParams;
-  const { sb } = await usuarioActual();
+  const { sb, perfil } = await usuarioActual();
+  const borrar = puedeEliminarExpediente(perfil.rol);
   const c = await catalogos(sb);
   const estado = f.estado ?? "activo";
 
@@ -82,6 +85,10 @@ export default async function Expedientes({ searchParams }: { searchParams: Prom
       </form>
 
       {error && <p className="error">No se pudo cargar la lista: {error.message}</p>}
+      {f.aviso === "eliminado" && <p className="aviso-ok" role="status">Expediente {f.num} eliminado.</p>}
+      {f.aviso === "falta-016" && <p className="error" role="alert">No se pudo eliminar: falta correr la migración 016 en Supabase.</p>}
+      {f.aviso === "error-borrar" && <p className="error" role="alert">No se pudo eliminar el expediente.</p>}
+      {f.aviso === "sin-permiso" && <p className="error" role="alert">Tu usuario no puede eliminar expedientes.</p>}
       {lista.length === 0 ? (
         <div className="hoja"><p className="vacio">Ningún expediente coincide con estos filtros.</p></div>
       ) : (
@@ -100,6 +107,16 @@ export default async function Expedientes({ searchParams }: { searchParams: Prom
                   <span className="meta col-resp">{e.responsable} · {e.etapa}</span>
                   <span>{e.proximo_vencimiento ? <PlazoChip vencimiento={e.proximo_vencimiento} /> : <span className="meta">Sin plazos abiertos</span>}</span>
                 </Link>
+                {borrar && (
+                  <details className="borrar-exp">
+                    <summary className="boton secundario chico peligro" aria-label={`Eliminar expediente ${e.numero}`}>Eliminar</summary>
+                    <form action={eliminarExpediente}>
+                      <input type="hidden" name="id" value={e.id} />
+                      <span>¿Eliminar <b>{e.numero}</b> con toda su bitácora, plazos y archivos? No se puede deshacer.</span>
+                      <button className="boton chico" style={{ background: "var(--rojo)", borderColor: "var(--rojo)" }}>Sí, eliminar</button>
+                    </form>
+                  </details>
+                )}
               </li>
             );
           })}

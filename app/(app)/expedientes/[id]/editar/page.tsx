@@ -3,6 +3,7 @@ import { ExpedienteForm } from "@/components/ExpedienteForm";
 import { catalogos } from "@/lib/catalogos";
 import { usuarioActual } from "@/lib/supabase/server";
 import { eliminarExpediente } from "../../acciones";
+import { puedeEliminarExpediente } from "@/lib/despacho";
 
 export const metadata = { title: "Editar expediente" };
 
@@ -15,7 +16,7 @@ export default async function Editar({ params }: { params: Promise<{ id: string 
     <>
       <div className="encabezado"><h1>Editar {exp.numero}</h1></div>
       <ExpedienteForm exp={exp} {...c} esAdmin={esAdmin} usuarioId={perfil.id} />
-      {esAdmin && (
+      {puedeEliminarExpediente(perfil.rol) && (
         <form action={eliminarExpediente} className="hoja" style={{ marginTop: 20 }}>
           <input type="hidden" name="id" value={exp.id} />
           <h2>Eliminar expediente</h2>
