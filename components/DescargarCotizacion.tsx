@@ -3,9 +3,24 @@ import { useState } from "react";
 import type { Cotizacion, Empresa } from "@/lib/cotizacion";
 
 
+/** Descarga el logo (ruta o imagen guardada) y mide su tamaño para colocarlo en el Excel. */
+async function leerLogo(src?: string | null) {
+  if (!src) return undefined;
+  try {
+    const blob = await (await fetch(src)).blob();
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    await new Promise((ok, mal) => { img.onload = ok; img.onerror = mal; img.src = url; });
+    URL.revokeObjectURL(url);
+    return { buffer: await blob.arrayBuffer(), extension: (blob.type.includes("jpeg") || blob.type.includes("jpg") ? "jpeg" : "png") as "png" | "jpeg", ancho: img.naturalWidth, alto: img.naturalHeight };
+  } catch {
+    return undefined;
+  }
+}
+
 async function generarExcel(c: Cotizacion, e: Empresa) {
   const { libroCotizacion } = await import("@/lib/excelCotizacion");
-  const buf = await (await libroCotizacion(c, e)).xlsx.writeBuffer();
+  const buf = await (await libroCotizacion(c, e, await leerLogo(e.logo))).xlsx.writeBuffer();
   const url = URL.createObjectURL(new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }));
   const a = document.createElement("a");
   a.href = url;

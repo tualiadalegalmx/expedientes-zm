@@ -511,3 +511,84 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--b
 .cz-letra span { display: block; font-size: 0.75rem; color: var(--tenue); }
 @media (max-width: 640px) { .cz-pie { grid-template-columns: 1fr; } .cz-folio { text-align: left; } .cz-folio dl div { justify-content: flex-start; } .cz-tabla { display: block; overflow-x: auto; } }
 @media print { .cot-estado { display: none !important; } .cotizacion .rep-sec h2 { border-left-color: var(--emp); } }
+
+/* ---------- Hojas de cotización por empresa (pantalla = PDF) ---------- */
+.hoja-cot {
+  background: #fff; color: #111; max-width: 820px; margin: 0 auto; padding: 40px 44px 28px;
+  border: 1px solid var(--greige); border-radius: var(--r);
+  font: 12.5px/1.4 Calibri, Carlito, "Source Sans 3", Arial, sans-serif; font-variant-numeric: tabular-nums;
+}
+.hoja-cot table { width: 100%; border-collapse: collapse; }
+.hoja-cot .cen { text-align: center; }
+.hoja-cot .imp { text-align: right; white-space: nowrap; }
+.hoja-cot .desc { white-space: pre-line; }
+.hoja-pie { text-align: center; margin-top: 36px; font-size: 11.5px; color: #333; }
+.firma { display: flex; flex-direction: column; align-items: center; margin-top: 34px; gap: 1px; break-inside: avoid; }
+.firma-linea { width: 240px; height: 46px; border-bottom: 1px solid #555; margin-bottom: 4px; }
+
+/* Clásica (TXX) */
+.hc-cabeza { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; margin-bottom: 14px; }
+.hc-logo { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.hc-logo img { width: 210px; height: auto; }
+.hc-razon { color: #8a6d45; font-weight: 700; letter-spacing: 0.06em; font-size: 12px; text-transform: uppercase; }
+.hc-nombre { font: 700 28px Georgia, serif; color: var(--emp); }
+.hc-datos { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; min-width: 250px; }
+.hc-datos > b { align-self: center; }
+.hc-folio { color: #b36b2c; }
+.hc-emp { display: flex; flex-direction: column; margin-top: 6px; }
+.hc-cliente, .hc-tabla, .hc-cond { border: 1px solid #222; }
+.hc-cliente thead th, .hc-tabla thead th, .hc-cond th { background: var(--emp); color: #fff; font-weight: 700; }
+.hc-cliente thead th { text-align: center; padding: 3px; font-size: 13px; }
+.hc-cliente tbody th { width: 110px; text-align: center; border: 1px solid #222; padding: 3px 6px; }
+.hc-cliente tbody td { border: 1px solid #222; padding: 3px 8px; }
+.hc-tabla { margin-top: 12px; font-size: 11px; }
+.hc-tabla thead th { padding: 4px 6px; font-size: 10.5px; border: 1px solid #222; }
+.hc-tabla td { border: 1px solid #222; padding: 8px 6px; vertical-align: middle; }
+.hc-tabla td.imp { font-weight: 700; }
+.hc-tabla th:nth-child(1) { width: 70px; } .hc-tabla th:nth-child(3) { width: 60px; }
+.hc-tabla th:nth-child(4), .hc-tabla th:nth-child(5) { width: 100px; }
+.hc-suma { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.hc-letra { margin: 8px 0 0; font-size: 10.5px; font-style: italic; color: #444; flex: 1; }
+.hc-totales { width: 200px !important; border: 1px solid #222; border-top: 0; font-size: 11px; }
+.hc-totales th { text-align: right; padding: 3px 8px; border: 1px solid #222; font-weight: 700; }
+.hc-totales td { text-align: right; padding: 3px 8px; border: 1px solid #222; font-weight: 700; width: 100px; }
+.hc-notas { margin: 14px 0 0; }
+.hc-cond { margin-top: 16px; }
+.hc-cond th { width: 110px; text-align: center; padding: 8px; font-size: 12.5px; }
+.hc-cond td { padding: 4px 8px; font-size: 10.5px; font-weight: 700; }
+
+/* Sencilla (Poiesis) */
+.hs-cabeza { display: grid; grid-template-columns: 150px 1fr; align-items: center; gap: 16px; }
+.hs-logo { width: 140px; height: auto; }
+.hs-nombre { font-size: 18px; color: var(--emp); }
+.hs-cabeza h1 { font: 700 28px Arial, sans-serif; text-transform: none; letter-spacing: 0; color: #111; margin: 0 0 0 40px; }
+.hs-folio { text-align: right; margin: 4px 0 6px; font-size: 13px; }
+.hs-folio span { color: #1f4f99; font-weight: 700; margin-left: 10px; }
+.hs-datos { font-size: 12.5px; }
+.hs-datos th { text-align: left; width: 110px; padding: 1px 4px 1px 0; vertical-align: top; border-bottom: 1px solid #555; }
+.hs-datos td { padding: 1px 4px; border-bottom: 1px solid #555; }
+.hs-tabla { margin-top: 2px; font-size: 12px; }
+.hs-tabla thead th { background: #d9d9d9; border: 1px solid #333; padding: 2px 6px; font-weight: 700; }
+.hs-tabla td { border: 1px solid #333; padding: 2px 6px; vertical-align: top; }
+.hs-tabla th:nth-child(1) { width: 50px; } .hs-tabla th:nth-child(3), .hs-tabla th:nth-child(4) { width: 70px; }
+.hs-tabla th:nth-child(5), .hs-tabla th:nth-child(6) { width: 95px; }
+.hs-suma { display: flex; flex-direction: column; align-items: center; margin-top: 18px; }
+.hs-totales { width: 190px !important; font-size: 12.5px; }
+.hs-totales th { text-align: left; font-weight: 400; padding: 1px 6px; }
+.hs-totales td { text-align: right; padding: 1px 6px; }
+.hs-totales .tt th, .hs-totales .tt td { font-weight: 700; border: 1px solid #111; }
+.hs-letra { font-size: 10.5px; font-style: italic; color: #444; margin: 6px 0 0; }
+.hs-notas { margin: 16px 0 0; }
+.hs-cond { display: grid; grid-template-columns: 110px 1fr; gap: 8px; margin-top: 22px; }
+.hs-cond > b { text-align: right; }
+
+@media (max-width: 700px) {
+  .hoja-cot { padding: 20px 14px; overflow-x: auto; }
+  .hc-cabeza { flex-direction: column; align-items: flex-start; }
+  .hs-cabeza h1 { margin: 0; font-size: 22px; }
+}
+@media print {
+  .hoja-cot { border: 0; padding: 0; max-width: none; }
+  .hoja-cot * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .hc-tabla tr, .hs-tabla tr { break-inside: avoid; }
+}

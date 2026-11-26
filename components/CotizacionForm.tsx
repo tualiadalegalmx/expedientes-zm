@@ -15,6 +15,8 @@ export function CotizacionForm({ empresas, cot, empresaInicial }: { empresas: Em
   const [moneda, setMoneda] = useState(cot?.moneda ?? "MXN");
   const empresa = empresas.find((e) => e.id === empresaId);
   const [condiciones, setCondiciones] = useState(cot?.condiciones ?? empresa?.condiciones ?? "");
+  const [conProveedor, setConProveedor] = useState(!!cot?.numero_proveedor);
+  const [proveedor, setProveedor] = useState(cot?.numero_proveedor ?? empresa?.numero_proveedor ?? "");
   const t = useMemo(() => totales(conceptos, ivaPct, descuento), [conceptos, ivaPct, descuento]);
 
   const cambiar = (i: number, campo: keyof Concepto, valor: string) =>
@@ -37,7 +39,7 @@ export function CotizacionForm({ empresas, cot, empresaInicial }: { empresas: Em
           <div className="campo">
             <label htmlFor="empresa_id">Empresa que cotiza</label>
             <select id="empresa_id" name="empresa_id" value={empresaId} disabled={!!cot}
-              onChange={(e) => { const id = Number(e.target.value); setEmpresaId(id); const em = empresas.find((x) => x.id === id); if (!cot && em?.condiciones) setCondiciones(em.condiciones); }}>
+              onChange={(e) => { const id = Number(e.target.value); setEmpresaId(id); const em = empresas.find((x) => x.id === id); if (!cot && em?.condiciones) setCondiciones(em.condiciones); if (!cot) setProveedor(em?.numero_proveedor ?? ""); }}>
               {empresas.map((e) => <option key={e.id} value={e.id}>{e.nombre}</option>)}
             </select>
             {cot && <input type="hidden" name="empresa_id" value={empresaId} />}
@@ -58,8 +60,13 @@ export function CotizacionForm({ empresas, cot, empresaInicial }: { empresas: Em
             </select>
           </div>
           <div className="campo ancho">
-            <label htmlFor="cliente">Cliente</label>
-            <input id="cliente" name="cliente" defaultValue={cot?.cliente} required placeholder="Nombre o razón social" />
+            <label htmlFor="cliente">Cliente <small>(nombre, cargo y dependencia o empresa; un dato por renglón)</small></label>
+            <textarea id="cliente" name="cliente" defaultValue={cot?.cliente} required rows={3} style={{ minHeight: 70 }}
+              placeholder={"Ing. Silvia Mejía Zaragoza\nDirectora General de Contrataciones Gubernamentales\nSecretaría de Finanzas y Planeación"} />
+          </div>
+          <div className="campo ancho">
+            <label htmlFor="cliente_direccion">Dirección del cliente <small>(opcional)</small></label>
+            <input id="cliente_direccion" name="cliente_direccion" defaultValue={cot?.cliente_direccion ?? ""} placeholder="Ej. Xalapa-Enríquez, Veracruz" />
           </div>
           <div className="campo">
             <label htmlFor="atencion">Atención a <small>(opcional)</small></label>
@@ -72,6 +79,16 @@ export function CotizacionForm({ empresas, cot, empresaInicial }: { empresas: Em
           <div className="campo">
             <label htmlFor="cliente_tel">Teléfono <small>(opcional)</small></label>
             <input id="cliente_tel" name="cliente_tel" defaultValue={cot?.cliente_tel ?? ""} />
+          </div>
+          <div className="campo ancho proveedor-campo">
+            <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <input type="checkbox" checked={conProveedor} onChange={(e) => setConProveedor(e.target.checked)} style={{ width: "auto" }} />
+              Incluir número de proveedor <small>(para SEFIPLAN u otro padrón de proveedores)</small>
+            </label>
+            {conProveedor && (
+              <input name="numero_proveedor" value={proveedor} onChange={(e) => setProveedor(e.target.value)} required
+                placeholder="Número de proveedor de esta empresa" aria-label="Número de proveedor" />
+            )}
           </div>
         </div>
       </section>

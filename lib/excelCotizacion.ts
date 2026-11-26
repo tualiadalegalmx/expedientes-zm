@@ -1,133 +1,246 @@
-import type { CellValue } from "exceljs";
+import type { Borders, CellValue, Worksheet } from "exceljs";
 import { conLetra, type Cotizacion, type Empresa } from "./cotizacion";
 
-const fechaTxt = (iso: string) =>
-  new Intl.DateTimeFormat("es-MX", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(iso + "T00:00:00Z"));
+export type Logo = { buffer: ArrayBuffer; extension: "png" | "jpeg"; ancho: number; alto: number };
 
-/** Arma el .xlsx con fórmulas para que se pueda seguir editando. */
-export async function libroCotizacion(c: Cotizacion, e: Empresa) {
+const corta = (iso: string) => { const [a, m, d] = iso.split("-"); return `${d}/${m}/${a}`; };
+const venceEl = (c: Cotizacion) => { const d = new Date(c.fecha + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() + c.vigencia_dias); return d.toISOString().slice(0, 10); };
+const MONEDA = (m: string) => m === "USD" ? '_-"US$"* #,##0.00_-;\\-"US$"* #,##0.00_-;_-"US$"* "-"??_-;_-@_-' : '_-"$"* #,##0.00_-;\\-"$"* #,##0.00_-;_-"$"* "-"??_-;_-@_-';
+const argb = (hex: string) => "FF" + (hex || "#2f3a30").replace("#", "").toUpperCase();
+const fino = { style: "thin" as const, color: { argb: "FF222222" } };
+const caja: Partial<Borders> = { top: fino, left: fino, bottom: fino, right: fino };
+/** Alto aproximado de un renglón para que el texto largo no se corte. */
+const alto = (texto: string, caracteresPorLinea: number, base = 15) =>
+  Math.max(base, texto.split("\n").reduce((n, l) => n + Math.max(1, Math.ceil(l.length / caracteresPorLinea)), 0) * 12.5 + 4);
+
+/** Arma el .xlsx con el formato de la empresa (sencillo = Poiesis, clásico = TXX), con fórmulas. */
+export async function libroCotizacion(c: Cotizacion, e: Empresa, logo?: Logo) {
   const ExcelJS = (await import("exceljs")).default;
   const wb = new ExcelJS.Workbook();
-  wb.creator = "Expedientes · Zaida Marmen";
-  const ws = wb.addWorksheet(c.folio, { pageSetup: { orientation: "portrait", fitToPage: true, fitToWidth: 1, fitToHeight: 0, margins: { left: 0.5, right: 0.5, top: 0.6, bottom: 0.6, header: 0.3, footer: 0.3 } } });
-  const color = (e.color || "#2f3a30").replace("#", "FF");
-  const moneda = c.moneda === "USD" ? '"US$"#,##0.00' : '"$"#,##0.00';
-  const fuente = { name: "Arial", size: 10 };
-  ws.columns = [{ width: 6 }, { width: 52 }, { width: 12 }, { width: 11 }, { width: 16 }, { width: 17 }];
-  ws.properties.defaultRowHeight = 16;
-
-  // Encabezado de la empresa
-  ws.mergeCells("A1:F1");
-  Object.assign(ws.getCell("A1"), { value: e.razon_social || e.nombre });
-  ws.getCell("A1").font = { name: "Arial", size: 16, bold: true, color: { argb: "FFFFFFFF" } };
-  ws.getCell("A1").fill = { type: "pattern", pattern: "solid", fgColor: { argb: color } };
-  ws.getRow(1).height = 30;
-  ws.getCell("A1").alignment = { vertical: "middle", indent: 1 };
-  const datosEmp = [e.rfc && `RFC: ${e.rfc}`, e.direccion, [e.telefono, e.correo].filter(Boolean).join("  ·  ")].filter(Boolean) as string[];
-  datosEmp.forEach((t, i) => {
-    ws.mergeCells(`A${2 + i}:F${2 + i}`);
-    ws.getCell(`A${2 + i}`).value = t;
-    ws.getCell(`A${2 + i}`).font = { ...fuente, color: { argb: "FF555555" } };
+  wb.creator = e.razon_social || e.nombre;
+  const ws = wb.addWorksheet(c.folio.slice(0, 31), {
+    pageSetup: { orientation: "portrait", fitToPage: true, fitToWidth: 1, fitToHeight: 0, horizontalCentered: true,
+      margins: { left: 0.4, right: 0.4, top: 0.5, bottom: 0.5, header: 0.2, footer: 0.2 } },
+    views: [{ showGridLines: false }],
   });
-  let r = 3 + datosEmp.length;
+  const img = logo ? wb.addImage({ buffer: logo.buffer as never, extension: logo.extension }) : null;
+  if (e.plantilla === "clasica") clasica(ws, c, e, img, logo);
+  else sencilla(ws, c, e, img, logo);
+  return wb;
+}
 
-  // Título y datos de la cotización
-  ws.getCell(`A${r}`).value = "COTIZACIÓN";
-  ws.getCell(`A${r}`).font = { name: "Arial", size: 14, bold: true, color: { argb: color } };
-  const dato = (etq: string, valor: string, negrita = false) => {
-    ws.getCell(`D${r}`).value = etq;
-    ws.getCell(`D${r}`).font = { ...fuente, color: { argb: "FF666666" } };
-    ws.getCell(`D${r}`).alignment = { horizontal: "right" };
-    ws.mergeCells(`E${r}:F${r}`);
-    ws.getCell(`E${r}`).value = valor;
-    ws.getCell(`E${r}`).font = { ...fuente, bold: negrita };
-    ws.getCell(`E${r}`).alignment = { horizontal: "right" };
-  };
-  dato("Folio", c.folio, true);
-  r++;
-  const vence = new Date(c.fecha + "T00:00:00Z"); vence.setUTCDate(vence.getUTCDate() + c.vigencia_dias);
-  dato("Fecha", fechaTxt(c.fecha)); r++;
-  dato("Vigente hasta", fechaTxt(vence.toISOString().slice(0, 10))); r++;
-  r++;
-  ([["Cliente", c.cliente], ["Atención", c.atencion], ["Correo", c.cliente_correo], ["Teléfono", c.cliente_tel]] as const).forEach(([k, v]) => {
-    if (!v) return;
-    ws.mergeCells(`A${r}:F${r}`);
-    ws.getCell(`A${r}`).value = { richText: [{ text: `${k}: `, font: { ...fuente, bold: true } }, { text: v, font: { ...fuente, bold: k === "Cliente", size: k === "Cliente" ? 11 : 10 } }] };
+function poner(ws: Worksheet, ref: string, valor: CellValue, estilo: Record<string, unknown> = {}) {
+  const cell = ws.getCell(ref);
+  cell.value = valor;
+  Object.assign(cell, estilo);
+  return cell;
+}
+
+// ------------------------------------------------------------------ Clásica (TXX)
+function clasica(ws: Worksheet, c: Cotizacion, e: Empresa, img: number | null, logo?: Logo) {
+  const F = { name: "Calibri", size: 11 };
+  const color = argb(e.color);
+  const banda = { type: "pattern" as const, pattern: "solid" as const, fgColor: { argb: color } };
+  const blanco = { ...F, bold: true, color: { argb: "FFFFFFFF" } };
+  ws.columns = [{ width: 1.4 }, { width: 14 }, { width: 25 }, { width: 29 }, { width: 7.5 }, { width: 12.5 }, { width: 14 }, { width: 2 }];
+  const moneda = MONEDA(c.moneda);
+
+  // Logo a la izquierda; datos de la cotización a la derecha
+  if (img !== null && logo) {
+    const w = 300, h = Math.round((logo.alto / logo.ancho) * w);
+    ws.addImage(img, { tl: { col: 1.2, row: 1.3 }, ext: { width: w, height: h } });
+  }
+  ws.mergeCells("F2:G2"); poner(ws, "F2", "COTIZACIÓN", { font: { ...F, bold: true }, alignment: { horizontal: "center" } });
+  ws.mergeCells("F3:G3"); poner(ws, "F3", c.folio, { font: { ...F, bold: true, color: { argb: "FFB36B2C" } }, alignment: { horizontal: "center" } });
+  ws.mergeCells("F4:G4"); poner(ws, "F4", `FECHA:    ${corta(c.fecha)}`, { font: { ...F, bold: true }, alignment: { horizontal: "center" } });
+  const datos = [e.rfc && ["RFC: ", e.rfc], e.telefono && ["TEL: ", e.telefono], e.correo && ["CORREO: ", e.correo],
+    c.numero_proveedor && ["NO. PROVEEDOR: ", c.numero_proveedor]].filter(Boolean) as string[][];
+  let r = 5;
+  for (const [k, v] of datos) {
+    ws.mergeCells(`E${r}:G${r}`);
+    poner(ws, `E${r}`, { richText: [{ text: k, font: { ...F, bold: true } }, { text: v, font: F }] });
     r++;
-  });
+  }
+  if (e.razon_social) {
+    const fr = img !== null ? 8 : 2;
+    ws.mergeCells(`B${fr}:C${fr}`);
+    poner(ws, `B${fr}`, e.razon_social.replace(/^TXX\s*/i, "").toUpperCase(), { font: { ...F, bold: true, size: 10, color: { argb: "FF8A6D45" } }, alignment: { horizontal: "center" } });
+  }
+  r = Math.max(r + 1, 10);
+
+  // Datos del cliente
+  ws.mergeCells(`B${r}:G${r}`);
+  poner(ws, `B${r}`, "DATOS DEL CLIENTE", { font: blanco, fill: banda, alignment: { horizontal: "center" }, border: caja });
+  r++;
+  const filas: [string, string | null | undefined, boolean][] = [
+    ["NOMBRE:", c.cliente, true], ["ATENCIÓN:", c.atencion, false], ["DIRECCIÓN:", c.cliente_direccion, false],
+    ["CORREO:", c.cliente_correo, false], ["TELÉFONO:", c.cliente_tel, false]];
+  for (const [k, v, negrita] of filas) {
+    if (!v) continue;
+    poner(ws, `B${r}`, k, { font: { ...F, bold: true }, alignment: { horizontal: "center", vertical: "middle" }, border: caja });
+    ws.mergeCells(`C${r}:G${r}`);
+    poner(ws, `C${r}`, v, { font: { ...F, bold: negrita }, alignment: { wrapText: true, vertical: "middle" }, border: caja });
+    ws.getRow(r).height = alto(v, 70);
+    r++;
+  }
   r++;
 
-  // Tabla de conceptos
-  const enc = ["#", "Descripción", "Unidad", "Cantidad", "Precio unitario", "Importe"];
-  const filaEnc = ws.getRow(r);
-  enc.forEach((t, i) => {
-    const cell = filaEnc.getCell(i + 1);
-    cell.value = t;
-    cell.font = { ...fuente, bold: true, color: { argb: "FFFFFFFF" } };
-    cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: color } };
-    cell.alignment = { vertical: "middle", horizontal: i >= 3 ? "right" : "left" };
-  });
-  filaEnc.height = 20;
+  // Conceptos
+  const enc: [string, string][] = [["B", "CANTIDAD"], ["C", "DESCRIPCIÓN"], ["E", "UNIDAD"], ["F", "P.U. COMPRA"], ["G", "TOTAL"]];
+  ws.mergeCells(`C${r}:D${r}`);
+  for (const [col, t] of enc) poner(ws, `${col}${r}`, t, { font: { ...blanco, size: 9 }, fill: banda, alignment: { horizontal: "center", vertical: "middle" }, border: caja });
+  ws.getCell(`D${r}`).border = caja;
+  ws.getRow(r).height = 18;
+  const primera = r + 1;
+  for (const k of c.conceptos) {
+    r++;
+    const f9 = { ...F, size: 9 };
+    poner(ws, `B${r}`, Number(k.cantidad), { font: f9, numFmt: "#,##0", alignment: { horizontal: "center", vertical: "middle" }, border: caja });
+    ws.mergeCells(`C${r}:D${r}`);
+    poner(ws, `C${r}`, k.descripcion, { font: f9, alignment: { wrapText: true, vertical: "middle" }, border: caja });
+    poner(ws, `E${r}`, k.unidad || "", { font: f9, alignment: { horizontal: "center", vertical: "middle" }, border: caja });
+    poner(ws, `F${r}`, Number(k.precio), { font: { ...f9, bold: true }, numFmt: moneda, alignment: { vertical: "middle" }, border: caja });
+    poner(ws, `G${r}`, { formula: `B${r}*F${r}`, result: Number(k.cantidad) * Number(k.precio) }, { font: { ...f9, bold: true }, numFmt: moneda, alignment: { vertical: "middle" }, border: caja });
+    ws.getRow(r).height = Math.max(30, alto(k.descripcion, 62, 30) * 0.92);
+  }
+  const ultima = r;
+  r++;
+
+  // Totales con fórmulas
+  const total = (etq: string, valor: CellValue) => {
+    poner(ws, `F${r}`, etq, { font: { ...F, size: 9, bold: true }, alignment: { horizontal: "right" }, border: caja });
+    poner(ws, `G${r}`, valor, { font: { ...F, size: 9, bold: true }, numFmt: moneda, border: caja });
+    return r++;
+  };
+  const rSub = total("SUBTOTAL", { formula: `SUM(G${primera}:G${ultima})`, result: Number(c.subtotal) });
+  const rDesc = Number(c.descuento) > 0 ? total("DESCUENTO", Number(c.descuento)) : null;
+  const pct = Number(c.iva_pct) / 100;
+  const base = rDesc ? `(G${rSub}-G${rDesc})` : `G${rSub}`;
+  const rIva = total(pct === 0.16 ? "IVA" : `IVA ${Number(c.iva_pct)}%`, { formula: `ROUND(${base}*${pct},2)`, result: Number(c.iva) });
+  total("TOTAL", { formula: `${base}+G${rIva}`, result: Number(c.total) });
+  ws.mergeCells(`B${rSub}:E${rIva}`);
+  poner(ws, `B${rSub}`, conLetra(Number(c.total), c.moneda), { font: { ...F, size: 9, italic: true, color: { argb: "FF444444" } }, alignment: { vertical: "top", wrapText: true } });
+  r++;
+
+  if (c.notas) {
+    ws.mergeCells(`B${r}:G${r}`);
+    poner(ws, `B${r}`, c.notas, { font: { ...F, size: 10 }, alignment: { wrapText: true, vertical: "top" } });
+    ws.getRow(r).height = alto(c.notas, 95);
+    r += 2;
+  }
+  if (c.condiciones) {
+    const lineas = c.condiciones.split("\n").length;
+    const fin = r + Math.max(2, lineas) - 1;
+    ws.mergeCells(`B${r}:B${fin}`);
+    poner(ws, `B${r}`, "CONDICIONES COMERCIALES:", { font: blanco, fill: banda, alignment: { horizontal: "center", vertical: "middle", wrapText: true }, border: caja });
+    ws.mergeCells(`C${r}:G${fin}`);
+    poner(ws, `C${r}`, c.condiciones, { font: { ...F, size: 8, bold: true }, alignment: { wrapText: true, vertical: "top" }, border: caja });
+    for (let i = r; i <= fin; i++) ws.getRow(i).height = Math.max(15, (lineas * 11.5 + 6) / (fin - r + 1));
+    r = fin + 2;
+  }
+  firma(ws, r, e, "B", "G", F);
+}
+
+// ------------------------------------------------------------------ Sencilla (Poiesis)
+function sencilla(ws: Worksheet, c: Cotizacion, e: Empresa, img: number | null, logo?: Logo) {
+  const F = { name: "Arial", size: 11 };
+  ws.columns = [{ width: 16.3 }, { width: 11 }, { width: 7.1 }, { width: 10.1 }, { width: 10 }, { width: 13.9 }, { width: 10.3 }, { width: 12.7 }, { width: 13 }];
+  const moneda = MONEDA(c.moneda);
+  const gris = { type: "pattern" as const, pattern: "solid" as const, fgColor: { argb: "FFD9D9D9" } };
+  const linea = { bottom: { style: "thin" as const, color: { argb: "FF555555" } } };
+
+  if (img !== null && logo) {
+    const w = 98, h = Math.round((logo.alto / logo.ancho) * w);
+    ws.addImage(img, { tl: { col: 0.15, row: 0.1 }, ext: { width: w, height: h } });
+  } else if (!logo) {
+    poner(ws, "A1", e.razon_social || e.nombre, { font: { ...F, bold: true } });
+  }
+  ws.mergeCells("A1:I1");
+  poner(ws, "A1", "COTIZACIÓN", { font: { ...F, size: 20, bold: true }, alignment: { horizontal: "center", vertical: "middle" } });
+  ws.getRow(1).height = 75;
+  ws.mergeCells("G2:H2");
+  poner(ws, "G2", "No. Cotización:", { font: { ...F, bold: true }, alignment: { horizontal: "right" } });
+  poner(ws, "I2", c.folio, { font: { ...F, bold: true, color: { argb: "FF1F4F99" } }, alignment: { horizontal: "center" } });
+
+  let r = 3;
+  const filas: [string, string | null | undefined][] = [
+    ["Cliente:", c.cliente], ["Atención:", c.atencion], ["Teléfono:", c.cliente_tel || "N/A"], ["Correo:", c.cliente_correo],
+    ["Fecha:", corta(c.fecha)], ["Vigencia:", corta(venceEl(c))], ["Dirección:", c.cliente_direccion], ["No. Proveedor:", c.numero_proveedor]];
+  for (const [k, v] of filas) {
+    if (!v) continue;
+    poner(ws, `A${r}`, k, { font: { ...F, bold: true }, border: linea, alignment: { vertical: "top" } });
+    ws.mergeCells(`B${r}:I${r}`);
+    poner(ws, `B${r}`, v, { font: F, border: linea, alignment: { wrapText: true, vertical: "top" } });
+    ws.getRow(r).height = alto(v, 66);
+    r++;
+  }
+
+  // Conceptos
+  const enc: [string, string][] = [["A", "No."], ["B", "Descripción"], ["F", "Unidad"], ["G", "Cantidad"], ["H", "P. Unitario"], ["I", "Importe"]];
+  ws.mergeCells(`B${r}:E${r}`);
+  for (const [col, t] of enc) poner(ws, `${col}${r}`, t, { font: { ...F, bold: true }, fill: gris, alignment: { horizontal: "center" }, border: caja });
   const primera = r + 1;
   c.conceptos.forEach((k, i) => {
     r++;
-    const row = ws.getRow(r);
-    row.getCell(1).value = i + 1;
-    row.getCell(2).value = k.descripcion;
-    row.getCell(2).alignment = { wrapText: true, vertical: "top" };
-    row.getCell(3).value = k.unidad || "";
-    row.getCell(4).value = Number(k.cantidad);
-    row.getCell(5).value = Number(k.precio);
-    row.getCell(5).numFmt = moneda;
-    row.getCell(6).value = { formula: `D${r}*E${r}`, result: Number(k.cantidad) * Number(k.precio) };
-    row.getCell(6).numFmt = moneda;
-    for (let j = 1; j <= 6; j++) {
-      row.getCell(j).border = { bottom: { style: "thin", color: { argb: "FFD8D1C4" } } };
-      if (j !== 2) row.getCell(j).alignment = { vertical: "top", horizontal: j >= 4 ? "right" : "left" };
-      if (!row.getCell(j).font) row.getCell(j).font = fuente;
-    }
-    row.height = Math.max(16, Math.ceil(k.descripcion.length / 60) * 15);
+    poner(ws, `A${r}`, i + 1, { font: F, alignment: { horizontal: "center", vertical: "top" }, border: caja });
+    ws.mergeCells(`B${r}:E${r}`);
+    poner(ws, `B${r}`, k.descripcion, { font: F, alignment: { wrapText: true, vertical: "top" }, border: caja });
+    poner(ws, `F${r}`, k.unidad || "", { font: F, alignment: { horizontal: "center", vertical: "top" }, border: caja });
+    poner(ws, `G${r}`, Number(k.cantidad), { font: F, alignment: { horizontal: "center", vertical: "top" }, border: caja });
+    poner(ws, `H${r}`, Number(k.precio), { font: F, numFmt: moneda, alignment: { vertical: "top" }, border: caja });
+    poner(ws, `I${r}`, { formula: `G${r}*H${r}`, result: Number(k.cantidad) * Number(k.precio) }, { font: F, numFmt: moneda, alignment: { vertical: "top" }, border: caja });
+    ws.getRow(r).height = alto(k.descripcion, 40);
   });
   const ultima = r;
   r += 2;
 
-  // Totales con fórmulas
+  // Totales (abarcan TODOS los conceptos)
   const total = (etq: string, valor: CellValue, negrita = false) => {
-    ws.getCell(`E${r}`).value = etq;
-    ws.getCell(`E${r}`).alignment = { horizontal: "right" };
-    ws.getCell(`F${r}`).value = valor;
-    ws.getCell(`F${r}`).numFmt = moneda;
-    ws.getCell(`E${r}`).font = ws.getCell(`F${r}`).font = { ...fuente, bold: negrita, size: negrita ? 12 : 10 };
+    poner(ws, `E${r}`, etq, { font: { ...F, bold: negrita }, border: negrita ? caja : undefined });
+    poner(ws, `F${r}`, valor, { font: { ...F, bold: negrita }, numFmt: moneda, border: negrita ? caja : undefined });
     return r++;
   };
-  const rSub = total("Subtotal", { formula: `SUM(F${primera}:F${ultima})`, result: Number(c.subtotal) });
-  const rDesc = total("Descuento", Number(c.descuento));
-  ws.getCell(`D${r}`).value = Number(c.iva_pct) / 100;
-  ws.getCell(`D${r}`).numFmt = "0%";
-  ws.getCell(`D${r}`).note = "Cambia el porcentaje de IVA aquí";
-  const rIva = total("IVA", { formula: `ROUND((F${rSub}-F${rDesc})*D${r},2)`, result: Number(c.iva) });
-  const rTot = total("Total", { formula: `F${rSub}-F${rDesc}+F${rIva}`, result: Number(c.total) }, true);
-  ws.getCell(`F${rTot}`).fill = ws.getCell(`E${rTot}`).fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF3EEE5" } };
-  ws.getCell(`F${rTot}`).border = { top: { style: "medium", color: { argb: color } } };
-  r++;
-  ws.mergeCells(`A${r}:F${r}`);
-  ws.getCell(`A${r}`).value = `Importe con letra: ${conLetra(Number(c.total), c.moneda)}`;
-  ws.getCell(`A${r}`).font = { ...fuente, italic: true };
-  r += 2;
+  const rSub = total("Subtotal", { formula: `SUM(I${primera}:I${ultima})`, result: Number(c.subtotal) });
+  const rDesc = Number(c.descuento) > 0 ? total("Descuento", Number(c.descuento)) : null;
+  const pct = Number(c.iva_pct) / 100;
+  const base = rDesc ? `(F${rSub}-F${rDesc})` : `F${rSub}`;
+  const rIva = total(pct === 0.16 ? "IVA" : `IVA ${Number(c.iva_pct)}%`, { formula: `ROUND(${base}*${pct},2)`, result: Number(c.iva) });
+  total("Total", { formula: `${base}+F${rIva}`, result: Number(c.total) }, true);
+  ws.mergeCells(`B${r}:I${r}`);
+  poner(ws, `B${r}`, conLetra(Number(c.total), c.moneda), { font: { ...F, size: 9, italic: true, color: { argb: "FF444444" } }, alignment: { horizontal: "center" } });
+  r += 3;
 
-  for (const [titulo, texto] of [["Notas", c.notas], ["Condiciones", c.condiciones]] as const) {
-    if (!texto) continue;
-    ws.getCell(`A${r}`).value = titulo;
-    ws.getCell(`A${r}`).font = { ...fuente, bold: true, color: { argb: color } };
-    r++;
-    ws.mergeCells(`A${r}:F${r}`);
-    ws.getCell(`A${r}`).value = texto;
-    ws.getCell(`A${r}`).alignment = { wrapText: true, vertical: "top" };
-    ws.getRow(r).height = Math.max(18, (texto.split("\n").length + Math.ceil(texto.length / 110)) * 14);
+  if (c.notas) {
+    ws.mergeCells(`A${r}:I${r}`);
+    poner(ws, `A${r}`, c.notas, { font: F, alignment: { wrapText: true, vertical: "top" } });
+    ws.getRow(r).height = alto(c.notas, 95);
     r += 2;
   }
-
-  ws.eachRow((row) => row.eachCell((cell) => { if (!cell.font?.name) cell.font = { ...fuente, ...(cell.font ?? {}) }; }));
-  return wb;
+  if (c.condiciones) {
+    poner(ws, `A${r}`, "Condiciones:", { font: { ...F, bold: true }, alignment: { horizontal: "right", vertical: "top" } });
+    ws.mergeCells(`B${r}:I${r}`);
+    poner(ws, `B${r}`, c.condiciones, { font: F, alignment: { wrapText: true, vertical: "top" } });
+    ws.getRow(r).height = alto(c.condiciones, 80);
+    r += 3;
+  }
+  r = firma(ws, r, e, "D", "G", F) + 4;
+  if (e.pie) {
+    ws.mergeCells(`A${r}:I${r}`);
+    poner(ws, `A${r}`, e.pie, { font: F, alignment: { horizontal: "center" } });
+  }
 }
 
+function firma(ws: Worksheet, r: number, e: Empresa, de: string, a: string, F: { name: string; size: number }) {
+  if (!e.firmante_nombre) return r;
+  ws.mergeCells(`${de}${r}:${a}${r}`);
+  poner(ws, `${de}${r}`, "ATENTAMENTE", { font: { ...F, bold: true }, alignment: { horizontal: "center" } });
+  r += 3;
+  ws.mergeCells(`${de}${r}:${a}${r}`);
+  poner(ws, `${de}${r}`, e.firmante_nombre, { font: F, alignment: { horizontal: "center" } });
+  if (e.firmante_cargo) {
+    r++;
+    ws.mergeCells(`${de}${r}:${a}${r}`);
+    poner(ws, `${de}${r}`, e.firmante_cargo, { font: F, alignment: { horizontal: "center" } });
+  }
+  return r;
+}

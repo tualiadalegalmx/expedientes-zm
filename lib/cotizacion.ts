@@ -2,12 +2,15 @@ export type Concepto = { descripcion: string; unidad?: string; cantidad: number;
 export type Empresa = {
   id: number; nombre: string; razon_social: string | null; rfc: string | null; direccion: string | null;
   telefono: string | null; correo: string | null; prefijo: string; color: string; condiciones: string | null; activa: boolean;
+  plantilla?: "sencilla" | "clasica"; logo?: string | null; firmante_nombre?: string | null; firmante_cargo?: string | null;
+  pie?: string | null; numero_proveedor?: string | null; folio_con_anio?: boolean;
 };
 export type Cotizacion = {
   id: string; empresa_id: number; folio: string; fecha: string; vigencia_dias: number; cliente: string;
   atencion: string | null; cliente_correo: string | null; cliente_tel: string | null; moneda: string;
   conceptos: Concepto[]; iva_pct: number; descuento: number; subtotal: number; iva: number; total: number;
   notas: string | null; condiciones: string | null; estado: string; created_by: string; created_at: string;
+  cliente_direccion?: string | null; numero_proveedor?: string | null;
 };
 
 /** Zaida, Rafael y Ricardo. */
