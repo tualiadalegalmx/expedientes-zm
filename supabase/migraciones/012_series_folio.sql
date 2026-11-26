@@ -1,7 +1,8 @@
 -- Migración 012 · Series de folio (26 nov 2026)
 -- Cada empresa tiene su serie general (TXX-001, GCP-001…) y, opcionalmente,
 -- una serie especial para un cliente como SEFIPLAN (SEF-01-26), que se elige
--- al capturar la cotización. Requiere la 010 y la 011. Se puede correr más de una vez.
+-- al capturar la cotización. Cada empresa lleva sus propios consecutivos.
+-- Requiere la 010 y la 011. Se puede correr más de una vez.
 
 alter table empresas add column if not exists folio_digitos          int  not null default 3 check (folio_digitos between 1 and 6);
 alter table empresas add column if not exists especial_prefijo       text;          -- p. ej. SEF
@@ -10,6 +11,9 @@ alter table empresas add column if not exists especial_con_anio      boolean not
 alter table empresas add column if not exists especial_digitos       int  not null default 2 check (especial_digitos between 1 and 6);
 alter table cotizaciones add column if not exists serie text not null default 'general' check (serie in ('general', 'especial'));
 
+-- El folio es único por empresa: TXX y Poiesis pueden tener cada una su SEF-01-26.
+alter table cotizaciones drop constraint if exists cotizaciones_folio_key;
+create unique index if not exists cotizaciones_empresa_folio_unico on cotizaciones (empresa_id, folio);
 drop index if exists cotizaciones_empresa_idx;
 create index if not exists cotizaciones_serie_idx on cotizaciones (empresa_id, serie, consecutivo desc);
 
@@ -29,7 +33,7 @@ begin
        and (not con_anio or extract(year from fecha) = extract(year from new.fecha));
     loop
       new.folio := pre || '-' || lpad(new.consecutivo::text, dig, '0') || case when con_anio then '-' || to_char(new.fecha, 'YY') else '' end;
-      exit when not exists (select 1 from cotizaciones where folio = new.folio);
+      exit when not exists (select 1 from cotizaciones where empresa_id = new.empresa_id and folio = new.folio);
       new.consecutivo := new.consecutivo + 1;
     end loop;
   else
@@ -48,8 +52,10 @@ end $$;
 update empresas set prefijo = 'TXX', folio_con_anio = false, folio_digitos = 3,
        especial_prefijo = 'SEF', especial_nombre = 'SEFIPLAN', especial_con_anio = true, especial_digitos = 2
  where nombre = 'TXX';
--- Poiesis: GCP-001
-update empresas set prefijo = 'GCP', folio_con_anio = false, folio_digitos = 3 where nombre = 'Poiesis';
+-- Poiesis: general GCP-001; SEFIPLAN SEF-01-26 (su propio consecutivo)
+update empresas set prefijo = 'GCP', folio_con_anio = false, folio_digitos = 3,
+       especial_prefijo = 'SEF', especial_nombre = 'SEFIPLAN', especial_con_anio = true, especial_digitos = 2
+ where nombre = 'Poiesis';
 
 select nombre,
        prefijo || '-' || lpad('1', folio_digitos, '0') as folio_general,
