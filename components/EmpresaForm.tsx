@@ -61,12 +61,34 @@ export function EmpresaForm({ empresa }: { empresa?: Empresa }) {
             <option value="clasica">Con franjas de color (como TXX)</option>
           </select>
         </div>
-        <div className="campo"><label htmlFor={`fa-${k}`}>Folio</label>
+        <div className="campo"><label htmlFor={`fa-${k}`}>Folio general</label>
           <select id={`fa-${k}`} name="folio_con_anio" defaultValue={empresa?.folio_con_anio ? "si" : "no"}>
-            <option value="no">Consecutivo (COT-01, COT-02…)</option>
-            <option value="si">Con año (SEF-01-26), reinicia cada año</option>
+            <option value="no">Consecutivo (TXX-001, TXX-002…)</option>
+            <option value="si">Con año (TXX-001-26), reinicia cada año</option>
           </select>
         </div>
+        <div className="campo"><label htmlFor={`fd-${k}`}>Dígitos del folio</label>
+          <select id={`fd-${k}`} name="folio_digitos" defaultValue={String(empresa?.folio_digitos ?? 3)}>
+            {[2, 3, 4].map((n) => <option key={n} value={n}>{n} ({"1".padStart(n, "0")})</option>)}
+          </select>
+        </div>
+        <fieldset className="campo ancho serie-fs">
+          <legend>Serie especial <small>(opcional, p. ej. para SEFIPLAN)</small></legend>
+          <div className="campos" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))" }}>
+            <div className="campo"><label htmlFor={`en-${k}`}>Para</label><input id={`en-${k}`} name="especial_nombre" defaultValue={empresa?.especial_nombre ?? ""} placeholder="Ej. SEFIPLAN" /></div>
+            <div className="campo"><label htmlFor={`ep-${k}`}>Prefijo</label><input id={`ep-${k}`} name="especial_prefijo" defaultValue={empresa?.especial_prefijo ?? ""} maxLength={6} placeholder="Ej. SEF" /></div>
+            <div className="campo"><label htmlFor={`ea-${k}`}>Formato</label>
+              <select id={`ea-${k}`} name="especial_con_anio" defaultValue={empresa?.especial_con_anio === false ? "no" : "si"}>
+                <option value="si">Con año (SEF-01-26)</option><option value="no">Sin año (SEF-01)</option>
+              </select>
+            </div>
+            <div className="campo"><label htmlFor={`ed-${k}`}>Dígitos</label>
+              <select id={`ed-${k}`} name="especial_digitos" defaultValue={String(empresa?.especial_digitos ?? 2)}>
+                {[2, 3, 4].map((n) => <option key={n} value={n}>{n}</option>)}
+              </select>
+            </div>
+          </div>
+        </fieldset>
         <div className="campo"><label htmlFor={`np-${k}`}>Número de proveedor <small>(opcional)</small></label><input id={`np-${k}`} name="numero_proveedor" defaultValue={empresa?.numero_proveedor ?? ""} placeholder="Ej. 54157" /></div>
         <LogoInput inicial={empresa?.logo} k={k} />
         <div className="campo"><label htmlFor={`fn-${k}`}>Firma: nombre</label><input id={`fn-${k}`} name="firmante_nombre" defaultValue={empresa?.firmante_nombre ?? ""} placeholder="Ej. RAFAEL LINALDI CHIPULI" /></div>

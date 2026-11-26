@@ -1,7 +1,7 @@
 "use client";
 import { useActionState, useMemo, useState } from "react";
 import { guardarCotizacion, type Resultado } from "@/app/(app)/cotizaciones/acciones";
-import { conLetra, dinero, totales, type Concepto, type Cotizacion, type Empresa } from "@/lib/cotizacion";
+import { conLetra, dinero, ejemploFolio, totales, type Concepto, type Cotizacion, type Empresa } from "@/lib/cotizacion";
 import { hoy } from "@/lib/fechas";
 
 const vacio = (): Concepto => ({ descripcion: "", unidad: "Servicio", cantidad: 1, precio: 0 });
@@ -16,6 +16,7 @@ export function CotizacionForm({ empresas, cot, empresaInicial }: { empresas: Em
   const empresa = empresas.find((e) => e.id === empresaId);
   const [condiciones, setCondiciones] = useState(cot?.condiciones ?? empresa?.condiciones ?? "");
   const [conProveedor, setConProveedor] = useState(!!cot?.numero_proveedor);
+  const [especial, setEspecial] = useState(cot?.serie === "especial");
   const [proveedor, setProveedor] = useState(cot?.numero_proveedor ?? empresa?.numero_proveedor ?? "");
   const t = useMemo(() => totales(conceptos, ivaPct, descuento), [conceptos, ivaPct, descuento]);
 
@@ -39,7 +40,7 @@ export function CotizacionForm({ empresas, cot, empresaInicial }: { empresas: Em
           <div className="campo">
             <label htmlFor="empresa_id">Empresa que cotiza</label>
             <select id="empresa_id" name="empresa_id" value={empresaId} disabled={!!cot}
-              onChange={(e) => { const id = Number(e.target.value); setEmpresaId(id); const em = empresas.find((x) => x.id === id); if (!cot && em?.condiciones) setCondiciones(em.condiciones); if (!cot) setProveedor(em?.numero_proveedor ?? ""); }}>
+              onChange={(e) => { const id = Number(e.target.value); setEmpresaId(id); const em = empresas.find((x) => x.id === id); if (!cot && em?.condiciones) setCondiciones(em.condiciones); if (!cot) { setProveedor(em?.numero_proveedor ?? ""); setEspecial(false); } }}>
               {empresas.map((e) => <option key={e.id} value={e.id}>{e.nombre}</option>)}
             </select>
             {cot && <input type="hidden" name="empresa_id" value={empresaId} />}
@@ -80,6 +81,18 @@ export function CotizacionForm({ empresas, cot, empresaInicial }: { empresas: Em
             <label htmlFor="cliente_tel">Teléfono <small>(opcional)</small></label>
             <input id="cliente_tel" name="cliente_tel" defaultValue={cot?.cliente_tel ?? ""} />
           </div>
+          {!cot && empresa?.especial_prefijo && (
+            <div className="campo ancho serie-especial">
+              <label style={{ display: "flex", gap: 8, alignItems: "center", fontWeight: 600 }}>
+                <input type="checkbox" name="serie" value="especial" checked={especial} style={{ width: "auto" }}
+                  onChange={(e) => { setEspecial(e.target.checked); if (e.target.checked && empresa.numero_proveedor) setConProveedor(true); }} />
+                Cotización para {empresa.especial_nombre || "cliente especial"}
+              </label>
+              <span className="aviso">
+                Folio: {especial ? `serie ${empresa.especial_nombre || empresa.especial_prefijo} (${ejemploFolio(empresa, true)}…)` : `serie general (${ejemploFolio(empresa)}…)`}
+              </span>
+            </div>
+          )}
           <div className="campo ancho proveedor-campo">
             <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
               <input type="checkbox" checked={conProveedor} onChange={(e) => setConProveedor(e.target.checked)} style={{ width: "auto" }} />

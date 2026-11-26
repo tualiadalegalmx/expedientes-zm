@@ -18,7 +18,7 @@ const num = (f: FormData, k: string, def = 0) => {
 function mensaje(m: string) {
   if ((m.includes("cotizaciones") || m.includes("empresas")) && (m.includes("does not exist") || m.includes("schema cache")))
     return "El generador todavía no está habilitado en la base de datos. Pide a Ricardo que corra la migración 010.";
-  if (["cliente_direccion", "numero_proveedor", "plantilla", "firmante", "folio_con_anio", "\"pie\"", "\"logo\""].some((c) => m.includes(c)))
+  if (["cliente_direccion", "numero_proveedor", "plantilla", "firmante", "folio_con_anio", "folio_digitos", "especial_", "column \"serie\"", "\"pie\"", "\"logo\""].some((c) => m.includes(c)))
     return "Falta correr la migración 011 (formatos de empresa) en Supabase.";
   if (m.includes("row-level security")) return "Tu usuario no tiene permiso para el generador de cotizaciones.";
   if (m.includes("empresas_nombre_key")) return "Ya existe una empresa con ese nombre.";
@@ -53,6 +53,7 @@ export async function guardarCotizacion(_: Resultado, form: FormData): Promise<R
     cliente_tel: txt(form, "cliente_tel"),
     cliente_direccion: txt(form, "cliente_direccion"),
     numero_proveedor: txt(form, "numero_proveedor"),
+    ...(form.get("serie") === "especial" ? { serie: "especial" } : {}),
     moneda: txt(form, "moneda") ?? "MXN",
     conceptos,
     iva_pct: num(form, "iva_pct", 16),
@@ -64,7 +65,8 @@ export async function guardarCotizacion(_: Resultado, form: FormData): Promise<R
   if (!datos.cliente) return { error: "Escribe el nombre del cliente." };
 
   if (id) {
-    const { empresa_id: _e, ...cambios } = datos;
+    const { empresa_id: _e, ...cambios } = datos as typeof datos & { serie?: string };
+    delete cambios.serie;
     const { error } = await sb.from("cotizaciones").update(cambios).eq("id", id);
     if (error) return { error: mensaje(error.message) };
     revalidatePath("/cotizaciones");
@@ -113,6 +115,11 @@ export async function guardarEmpresa(_: Resultado, form: FormData): Promise<Resu
     pie: txt(form, "pie"),
     numero_proveedor: txt(form, "numero_proveedor"),
     folio_con_anio: form.get("folio_con_anio") === "si",
+    folio_digitos: Math.min(6, Math.max(1, num(form, "folio_digitos", 3))),
+    especial_prefijo: (txt(form, "especial_prefijo") ?? "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6) || null,
+    especial_nombre: txt(form, "especial_nombre"),
+    especial_con_anio: form.get("especial_con_anio") !== "no",
+    especial_digitos: Math.min(6, Math.max(1, num(form, "especial_digitos", 2))),
   };
   if (datos.logo && datos.logo.length > 900_000) return { error: "El logo es demasiado pesado. Usa una imagen más pequeña." };
   if (!datos.nombre) return { error: "Escribe el nombre de la empresa." };

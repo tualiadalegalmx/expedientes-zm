@@ -3,14 +3,23 @@ export type Empresa = {
   id: number; nombre: string; razon_social: string | null; rfc: string | null; direccion: string | null;
   telefono: string | null; correo: string | null; prefijo: string; color: string; condiciones: string | null; activa: boolean;
   plantilla?: "sencilla" | "clasica"; logo?: string | null; firmante_nombre?: string | null; firmante_cargo?: string | null;
-  pie?: string | null; numero_proveedor?: string | null; folio_con_anio?: boolean;
+  pie?: string | null; numero_proveedor?: string | null; folio_con_anio?: boolean; folio_digitos?: number;
+  especial_prefijo?: string | null; especial_nombre?: string | null; especial_con_anio?: boolean; especial_digitos?: number;
 };
+
+/** Ejemplo del siguiente folio de una serie, para mostrarlo en pantalla. */
+export function ejemploFolio(e: Empresa, especial = false) {
+  const anio = String(new Date().getFullYear()).slice(2);
+  if (especial && e.especial_prefijo)
+    return `${e.especial_prefijo}-${"1".padStart(e.especial_digitos ?? 2, "0")}${e.especial_con_anio !== false ? `-${anio}` : ""}`;
+  return `${e.prefijo}-${"1".padStart(e.folio_digitos ?? 3, "0")}${e.folio_con_anio ? `-${anio}` : ""}`;
+}
 export type Cotizacion = {
   id: string; empresa_id: number; folio: string; fecha: string; vigencia_dias: number; cliente: string;
   atencion: string | null; cliente_correo: string | null; cliente_tel: string | null; moneda: string;
   conceptos: Concepto[]; iva_pct: number; descuento: number; subtotal: number; iva: number; total: number;
   notas: string | null; condiciones: string | null; estado: string; created_by: string; created_at: string;
-  cliente_direccion?: string | null; numero_proveedor?: string | null;
+  cliente_direccion?: string | null; numero_proveedor?: string | null; serie?: "general" | "especial";
 };
 
 /** Zaida, Rafael y Ricardo. */
