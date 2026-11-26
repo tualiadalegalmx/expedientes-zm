@@ -131,3 +131,16 @@ export async function guardarEmpresa(_: Resultado, form: FormData): Promise<Resu
   revalidatePath("/cotizaciones/empresas");
   redirect("/cotizaciones/empresas?ok=1");
 }
+
+export async function editarFolio(form: FormData) {
+  const { sb } = await acceso();
+  const id = String(form.get("id"));
+  const folio = String(form.get("folio") ?? "").trim().toUpperCase();
+  if (!folio) redirect(`/cotizaciones/${id}?aviso=folio-vacio`);
+  if (folio.length > 40) redirect(`/cotizaciones/${id}?aviso=folio-largo`);
+  const { data, error } = await sb.from("cotizaciones").update({ folio }).eq("id", id).select("folio").maybeSingle();
+  if (error) redirect(`/cotizaciones/${id}?aviso=${error.message.includes("duplicate") || error.code === "23505" ? "folio-repetido" : "folio-error"}`);
+  revalidatePath("/cotizaciones");
+  revalidatePath(`/cotizaciones/${id}`);
+  redirect(`/cotizaciones/${id}?aviso=${data?.folio === folio ? "folio-ok" : "falta-013"}`);
+}

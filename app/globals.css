@@ -595,3 +595,10 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--b
 .serie-especial { background: #eef2fa; border-left: 4px solid #04143a; border-radius: var(--r); padding: 10px 12px; }
 .serie-fs { border: 1px dashed var(--greige); border-radius: var(--r); padding: 8px 12px 12px; margin: 0; }
 .serie-fs legend { font-size: 0.88rem; font-weight: 600; color: var(--bosque); padding: 0 4px; }
+.editar-folio { margin: -6px 0 12px; }
+.editar-folio summary { list-style: none; display: inline-flex; cursor: pointer; }
+.editar-folio summary::-webkit-details-marker { display: none; }
+.editar-folio[open] summary { margin-bottom: 8px; }
+.editar-folio-form { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; background: var(--crema); border: 1px solid var(--greige); border-radius: var(--r); padding: 10px 12px; }
+.editar-folio-form label { font-weight: 600; font-size: 0.88rem; color: var(--bosque); }
+.editar-folio-form input { width: 12rem; }
