@@ -602,3 +602,50 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--b
 .editar-folio-form { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; background: var(--crema); border: 1px solid var(--greige); border-radius: var(--r); padding: 10px 12px; }
 .editar-folio-form label { font-weight: 600; font-size: 0.88rem; color: var(--bosque); }
 .editar-folio-form input { width: 12rem; }
+
+/* ---------- Empresas (expediente) ---------- */
+.ent-grupo { margin-bottom: 26px; }
+.ent-grupo h2 { font-size: 1.5rem; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 2px solid var(--bronce); }
+.ent-botones { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.ent-boton {
+  display: flex; flex-direction: column; justify-content: space-between; gap: 18px; min-height: 120px;
+  padding: 18px 20px; border-radius: 10px; text-decoration: none;
+  box-shadow: inset 0 -4px rgba(0,0,0,.18); transition: transform .12s ease, box-shadow .12s ease;
+}
+.ent-boton b { font: 600 1.25rem/1.2 var(--titulo); letter-spacing: 0.01em; }
+.ent-boton span { font-size: 0.85rem; opacity: 0.9; }
+.ent-boton:hover { transform: translateY(-2px); box-shadow: inset 0 -4px rgba(0,0,0,.18), 0 6px 14px rgba(0,0,0,.15); }
+.ent-boton:focus-visible { outline: 3px solid var(--bronce); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { .ent-boton { transition: none; } .ent-boton:hover { transform: none; } }
+.ent-nueva summary { cursor: pointer; }
+
+.ent-cabeza { border-radius: 10px; padding: 20px 24px; margin-bottom: 18px; }
+.ent-cabeza h1 { font-size: 2rem; text-transform: none; }
+.ent-cabeza p { margin: 4px 0 0; opacity: 0.9; }
+.ent-volver { text-decoration: none; font-size: 0.88rem; opacity: 0.9; }
+.ent-recordatorio { background: #fbf3ea; border-left: 5px solid var(--ambar); border-radius: var(--r); padding: 10px 14px; margin: 0 0 16px; }
+.ent-layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 20px; align-items: start; }
+@media (max-width: 960px) { .ent-layout { grid-template-columns: 1fr; } }
+.ent-layout > .hoja { margin: 0; padding: 0 0 16px; overflow: hidden; }
+.ent-meses { display: flex; gap: 6px; flex-wrap: wrap; padding: 12px 20px 0; }
+.ent-mes { text-decoration: none; font-size: 0.85rem; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--greige); background: #fff; }
+.ent-docs { padding: 4px 20px 0; }
+.ent-cat h3 { font-size: 1.1rem; margin: 16px 0 6px; padding-left: 8px; border-left: 4px solid; }
+.ent-cat ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.doc { display: grid; grid-template-columns: 3rem 1fr auto; gap: 12px; align-items: center; background: #fff; border: 1px solid var(--greige); border-radius: var(--r); padding: 8px 10px; }
+.doc-ico { width: 3rem; height: 3rem; border-radius: 6px; display: grid; place-items: center; font: 700 0.72rem var(--texto); }
+.doc-txt { display: flex; flex-direction: column; min-width: 0; }
+.doc-txt a { text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.doc-txt a:hover strong { text-decoration: underline; }
+.doc-notas { font-size: 0.85rem; }
+.doc-acc { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.boton.peligro { color: var(--rojo); }
+.boton.peligro:hover { border-color: var(--rojo); }
+@media (max-width: 600px) { .doc { grid-template-columns: 2.5rem 1fr; } .doc-acc { grid-column: 1 / -1; justify-content: flex-start; } .doc-ico { width: 2.5rem; height: 2.5rem; } }
+.ent-borrar-mes { margin: 18px 20px 0; }
+.ent-borrar-mes summary { list-style: none; display: inline-flex; cursor: pointer; }
+.ent-borrar-mes summary::-webkit-details-marker { display: none; }
+.ent-borrar-mes form { margin-top: 8px; padding: 10px 12px; border: 1px solid #e5b5a8; background: #f9e7e2; border-radius: var(--r); }
+.ent-borrar-mes p { margin: 0 0 8px; }
+.ent-editar { margin: 16px 20px 0; }
+.ent-editar summary { cursor: pointer; font-size: 0.9rem; color: var(--bosque); font-weight: 600; margin-bottom: 8px; }
