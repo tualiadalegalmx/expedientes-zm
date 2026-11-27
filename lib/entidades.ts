@@ -30,6 +30,7 @@ export const CATEGORIAS_PERMANENTES = [
   "Currículum",
   "Cédula fiscal / RFC",
   "Registro patronal IMSS",
+  "Padrón de proveedor",
   "Contrato",
   "Otro",
 ];
